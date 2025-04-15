@@ -1,85 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Resultados Bolos Hatogrande</title>
-  <script src="https://unpkg.com/tabletop@1.5.3/tabletop.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f7f7f7;
-    }
-    h1 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: #fff;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-    th {
-      background-color: #333;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #eee;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Page</title>
 </head>
 <body>
-  <h1>Campeonato Nacional de Menores 2025 - Resultados en Vivo</h1>
-  <table id="tablaResultados">
-    <thead>
-      <tr>
-        <th>Pto</th>
-        <th>Deportista</th>
-        <th>HCP</th>
-        <th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>L5</th>
-        <th>Total</th><th>TotalHCP</th><th>Promedio</th><th>PromedioHCP</th>
-      </tr>
-    </thead>
-    <tbody id="contenidoTabla"></tbody>
-  </table>
-
-  <script>
-    function mostrarResultados(data) {
-      const cuerpo = document.getElementById("contenidoTabla");
-      cuerpo.innerHTML = "";
-      data.forEach((fila) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${fila.Pto}</td>
-          <td>${fila.Deportista}</td>
-          <td>${fila.HCP}</td>
-          <td>${fila.L1}</td>
-          <td>${fila.L2}</td>
-          <td>${fila.L3}</td>
-          <td>${fila.L4}</td>
-          <td>${fila.L5}</td>
-          <td>${fila.Total}</td>
-          <td>${fila.TotalHCP}</td>
-          <td>${fila.Promedio}</td>
-          <td>${fila.PromedioHCP}</td>
-        `;
-        cuerpo.appendChild(tr);
-      });
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      Tabletop.init({
-        key: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTEFU5_WZT6youbMA8E7d7e_Ta7RhVd1WM6Xu8TicSo2A7ME5QyIF3objDSqzVDPDpQovtnDjT7TUmT/pubhtml",
-        callback: mostrarResultados,
-        simpleSheet: true
-      });
-    });
-  </script>
-</body>
-</html>
+  <h1>Hello, Bolos Hatogrande!</h1>
+  <p>If you're seeing this, the test page is working correctly.</p>
