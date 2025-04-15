@@ -86,7 +86,7 @@
 <nav class="navbar navbar-expand-lg navbar-custom">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
-      <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> BolosHatogrande
+      <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
       <span class="navbar-toggler-icon"></span>
@@ -107,36 +107,22 @@
   <div id="tabla-resultados" class="mt-4"></div>
 </div>
 
-<script>
-  function mostrarTabla(data) {
-    const contenedor = document.getElementById('tabla-resultados');
-    const columnas = ['Pto.', 'Deportista', 'HCP', 'L1', 'L2', 'L3', 'L4', 'L5', 'Total', 'Total con HCP', 'Promedio', 'Promedio con HCP'];
+<script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
+<script type='text/javascript'>    
+  var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1YTHfNJv9CCpqcy8hUXLRrY-cMmMwQJE5IA_K-ZRZCr0/edit?usp=sharing';
 
-    let html = `<div class="table-responsive"><table class="table table-bordered table-striped bg-light text-dark">
-      <thead class="table-success">
-        <tr>${columnas.map(col => `<th>${col}</th>`).join('')}</tr>
-      </thead>
-      <tbody>`;
-
-    data.forEach(row => {
-      html += '<tr>';
-      columnas.forEach(col => {
-        html += `<td>${row[col] || ''}</td>`;
-      });
-      html += '</tr>';
-    });
-
-    html += '</tbody></table></div>';
-    contenedor.innerHTML = html;
+  function init() {
+    Tabletop.init( { key: publicSpreadsheetUrl,
+                     callback: showInfo,
+                     simpleSheet: true } )
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    Tabletop.init({
-      key: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTEFU5_WZT6youbMA8E7d7e_Ta7RhVd1WM6Xu8TicSo2A7ME5QyIF3objDSqzVDPDpQovtnDjT7TUmT/pub?output=tsv',
-      simpleSheet: true,
-      callback: mostrarTabla
-    });
-  });
+  function showInfo(data, tabletop) {
+    alert('Successfully processed!')
+    console.log(data);
+  }
+
+  window.addEventListener('DOMContentLoaded', init)
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
