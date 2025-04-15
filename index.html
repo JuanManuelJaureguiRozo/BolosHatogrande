@@ -10,8 +10,7 @@
       background-color: #0066b2;
     }
     .navbar-custom .nav-link,
-    .navbar-custom .navbar-brand,
-    .navbar-custom .dropdown-item {
+    .navbar-custom .navbar-brand {
       color: white;
     }
     .navbar-custom .dropdown-menu {
@@ -35,23 +34,35 @@
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
       <ul class="navbar-nav me-auto">
 
-        <!-- Resultados Torneos -->
+        <!-- Resultados Torneos 2025 -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="sub12Dropdown" role="button" data-bs-toggle="dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="resultadosDropdown" role="button" data-bs-toggle="dropdown">
             Resultados Torneos 2025
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="#">Ternas</a></li>
+            <li><a class="dropdown-item" href="#">Dobles</a></li>
+            <li><a class="dropdown-item" href="#">Mixtos</a></li>
+            <li><a class="dropdown-item" href="#">Equipos</a></li>
+            <li><a class="dropdown-item" href="#">Sencillos</a></li>
+            <li><a class="dropdown-item" href="#">Todo Evento</a></li>
           </ul>
         </li>
 
         <!-- Escalafón -->
-        <li class="nav-item">
-          <a class="nav-link" href="#">Hombres</a>
-          <a class="nav-link" href="#">Mujeres</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="escalafonDropdown" role="button" data-bs-toggle="dropdown">
+            Escalafón
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Hombres</a></li>
+            <li><a class="dropdown-item" href="#">Mujeres</a></li>
+          </ul>
         </li>
 
       </ul>
+
+      <!-- Inicio -->
       <span class="navbar-text">
         <a class="nav-link text-white" href="#">🏠 Inicio</a>
       </span>
@@ -59,7 +70,7 @@
   </div>
 </nav>
 
-<!-- Contenido -->
+<!-- Contenido principal -->
 <div class="container mt-4">
   <h1>Bienvenido a los Resultados de Bolos</h1>
   <p>Selecciona una categoría en el menú para ver resultados.</p>
