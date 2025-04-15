@@ -16,21 +16,27 @@
     }
 
     .navbar-custom {
-      background-color: #004c3f; /* Verde del logo */
+      background-color: #004c3f;
     }
 
     .navbar-custom .nav-link,
-    .navbar-custom .navbar-brand,
-    .navbar-custom .dropdown-item {
+    .navbar-custom .navbar-brand {
       color: white;
     }
 
     .navbar-custom .dropdown-menu {
-      background-color: #f8f9fa;
+      background-color: white !important;
+      color: black !important;
+      border: none;
+      box-shadow: none; /* sin elevation */
+    }
+
+    .navbar-custom .dropdown-item {
+      color: black !important;
     }
 
     .navbar-custom .dropdown-item:hover {
-      background-color: #e2e6ea;
+      background-color: #f0f0f0;
       color: #000;
     }
 
@@ -44,6 +50,34 @@
       padding: 2rem;
       border-radius: 10px;
       margin-top: 2rem;
+    }
+
+    /* Menú lateral en móviles */
+    @media (max-width: 768px) {
+      .navbar-collapse {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 75%;
+        height: 100%;
+        background-color: #004c3f;
+        padding-top: 3.5rem;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .navbar-collapse.show {
+        transform: translateX(0);
+      }
+
+      .navbar-toggler {
+        z-index: 1100;
+      }
+
+      body.offcanvas-open {
+        overflow: hidden;
+      }
     }
   </style>
 </head>
@@ -59,9 +93,10 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav me-auto">
-
-        <!-- Resultados Torneos -->
+      <ul class="navbar-nav flex-column flex-lg-row">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="#">🏠 Inicio</a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
             Resultados Torneos
@@ -72,26 +107,35 @@
             <li><a class="dropdown-item" href="#">Individual</a></li>
           </ul>
         </li>
-
-        <!-- Escalafón -->
-        <li class="nav-item">
-          <a class="nav-link" href="#">Escalafón</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            Escalafón
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Hombres</a></li>
+            <li><a class="dropdown-item" href="#">Mujeres</a></li>
+          </ul>
         </li>
-
       </ul>
-      <span class="navbar-text">
-        <a class="nav-link text-white" href="#">🏠 Inicio</a>
-      </span>
     </div>
   </div>
 </nav>
 
-<!-- Contenido -->
 <div class="container contenido text-center">
-  <h1>Bienvenido a los Resultados de Bolos</h1>
-  <p>Selecciona una categoría en el menú para ver resultados.</p>
+  <h1>Bienvenido a los Resultados de Bolos del Club Hatogrande</h1>
+  <p>En esta página podrás consultar los resultados de los torneos del 2025 así como el escalafón de mujeres y hombres.</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Para evitar scroll cuando se abre el menú en móvil
+  const navbarCollapse = document.getElementById('navbarNavDropdown');
+  navbarCollapse.addEventListener('show.bs.collapse', () => {
+    document.body.classList.add('offcanvas-open');
+  });
+  navbarCollapse.addEventListener('hide.bs.collapse', () => {
+    document.body.classList.remove('offcanvas-open');
+  });
+</script>
 </body>
 </html>
