@@ -1,71 +1,55 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>BolosHatogrande</title>
-  <script src="https://unpkg.com/tabletop@1.5.1/src/tabletop.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      background: #f5f5f5;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #ddd;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolos Hatogrande</title>
 </head>
 <body>
-  <h1>BolosHatogrande</h1>
+  <h1>Resultados Torneos</h1>
+  <label for="torneo">Selecciona torneo:</label>
+  <select id="torneo">
+    <option value="Ternas2025">Abril 2025</option>
+  </select>
+
   <div id="tabla-resultados"></div>
 
   <script>
-    function mostrarResultados(data) {
-      let html = '<table><thead><tr>';
+    const sheetKey = '1YTHfNJv9CCpqcy8hUXLRrY-cMmMwQJE5IA_K-ZRZCr0';
 
-      // Encabezados
-      Object.keys(data[0]).forEach(col => {
-        html += `<th>${col}</th>`;
+    function cargarDatos(tabName) {
+      Tabletop.init({
+        key: sheetKey,
+        simpleSheet: false,
+        callback: function(data) {
+          const hoja = data[tabName].elements;
+          mostrarTabla(hoja);
+        }
       });
+    }
+
+    function mostrarTabla(data) {
+      let html = '<table border="1"><thead><tr>';
+      const headers = Object.keys(data[0]);
+      headers.forEach(h => html += `<th>${h}</th>`);
       html += '</tr></thead><tbody>';
 
-      // Filas
       data.forEach(row => {
         html += '<tr>';
-        Object.values(row).forEach(valor => {
-          html += `<td>${valor}</td>`;
-        });
+        headers.forEach(h => html += `<td>${row[h]}</td>`);
         html += '</tr>';
       });
 
       html += '</tbody></table>';
-      document.getElementById("tabla-resultados").innerHTML = html;
+      document.getElementById('tabla-resultados').innerHTML = html;
     }
 
-    // Inicializar Tabletop con tu ID
-    Tabletop.init({
-      key: '1YTHfNJv9CCpqcy8hUXLRrY-cMmMwQJE5IA_K-ZRZCr0',
-      callback: mostrarResultados,
-      simpleSheet: true
+    document.getElementById('torneo').addEventListener('change', e => {
+      cargarDatos(e.target.value);
     });
+
+    // Load default
+    window.onload = () => cargarDatos(document.getElementById('torneo').value);
   </script>
 </body>
 </html>
