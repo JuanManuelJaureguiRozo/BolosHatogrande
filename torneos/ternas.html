@@ -173,42 +173,48 @@
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTEFU5_WZT6youbMA8E7d7e_Ta7RhVd1WM6Xu8TicSo2A7ME5QyIF3objDSqzVDPDpQovtnDjT7TUmT/pubhtml?gid=0&single=true";
 
   async function fetchSheetAsTable(url) {
-    const res = await fetch(url);
-    const htmlText = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlText, 'text/html');
+  const res = await fetch(url);
+  const htmlText = await res.text();
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, 'text/html');
 
-    const table = doc.querySelector('table');
-    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark");
+  const table = doc.querySelector('table');
+  table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
 
-    // Eliminar primera columna (números de fila)
-    for (let row of table.rows) {
-      if (row.cells.length > 0) {
-        row.deleteCell(0);
+    // Estilo para encabezados (suponemos que están en las primeras dos filas)
+    for (let i = 0; i < 2; i++) {
+    if (table.rows[i]) {
+      for (let cell of table.rows[i].cells) {
+        cell.style.fontWeight = "bold";
+        cell.style.backgroundColor = "#004c3f";
+        cell.style.color = "white";
+        cell.style.whiteSpace = "nowrap";
       }
     }
-
-    // Eliminar primera fila (encabezados de columna)
-    table.deleteRow(0);
-
-    for (let cell of table.rows[0].cells) {
-      cell.style.fontWeight = "bold";
-      cell.style.backgroundColor = "#004c3f";
-      cell.style.color = "white";
-    }
-
-    // Ponerle negrilla a algunas columnas
-    for (let i = 1; i < table.rows.length; i++) {
-      const cell = table.rows[i].cells[0];
-      const cell10 = table.rows[i].cells[10];
-      const cell11 = table.rows[i].cells[11];
-      cell.style.fontWeight = "bold";
-      cell10.style.fontWeight = "bold";
-      cell11.style.fontWeight = "bold";
-    }
-
-    document.getElementById("tabla-resultados").appendChild(table);
   }
+
+  // Borrar la primera fila (si existe)
+  if (table.rows[0]) {
+    table.deleteRow(0);
+  }
+
+  // Borrar la primera columna (si existe)
+  for (let i = 0; i < table.rows.length; i++) {
+    if (table.rows[i].cells[0]) {
+      table.rows[i].deleteCell(0);
+    }
+  }
+
+  // Eliminar filas vacías (si existen)
+  for (let i = table.rows.length - 1; i >= 0; i--) {
+    if (table.rows[i].cells.length === 0 || Array.from(table.rows[i].cells).every(cell => cell.innerText.trim() === "")) {
+      table.deleteRow(i);
+    }
+  }
+
+  document.getElementById("tabla-resultados").appendChild(table);
+}
+
 
   fetchSheetAsTable(SHEET_URL);
 </script>
