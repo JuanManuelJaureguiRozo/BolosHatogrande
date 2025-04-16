@@ -211,6 +211,25 @@
     }
   }
 
+  // Resaltar las celdas que tengan un número mayor o igual a 200 que estén en las columnas "L1", "L2", "L3", "L4", "L5"
+  const columnsToHighlight = ["L1", "L2", "L3", "L4", "L5"];
+  const headerCells = Array.from(table.rows[0].cells);
+  const columnIndices = headerCells
+  .map((cell, index) => columnsToHighlight.includes(cell.innerText.trim()) ? index : -1)
+  .filter(index => index !== -1);
+  
+  for (let i = 1; i < table.rows.length; i++) {
+    for (const colIndex of columnIndices) {
+      const cell = table.rows[i].cells[colIndex];
+      if (parseFloat(cell.innerText) >= 200) {
+        cell.style.backgroundColor = "#ffeb3b"; // Color amarillo
+      }
+    }
+  }
+  
+    console.log("Columnas destacadas:", columnIndices.map(i => headerCells[i].innerText.trim()));
+
+
   document.getElementById("tabla-resultados").appendChild(table);
 }
 
