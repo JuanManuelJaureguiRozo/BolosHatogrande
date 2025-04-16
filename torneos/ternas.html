@@ -173,8 +173,7 @@
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTEFU5_WZT6youbMA8E7d7e_Ta7RhVd1WM6Xu8TicSo2A7ME5QyIF3objDSqzVDPDpQovtnDjT7TUmT/pubhtml?gid=0&single=true";
 
   async function fetchSheetAsTable(url) {
-  const finalUrl = `${url}?nocache=${Date.now()}`;
-  const res = await fetch(finalUrl);
+  const res = await fetch(url);
   const htmlText = await res.text();
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlText, 'text/html');
