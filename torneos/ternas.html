@@ -118,6 +118,10 @@
       table {
         font-size: 0.85rem;
       }
+
+      .highlight {
+        background-color: #ffeb3b !important;
+      }
     }
   </style>  
 </head>
@@ -179,60 +183,37 @@
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTEFU5_WZT6youbMA8E7d7e_Ta7RhVd1WM6Xu8TicSo2A7ME5QyIF3objDSqzVDPDpQovtnDjT7TUmT/pubhtml?gid=0&single=true";
 
   async function fetchSheetAsTable(url) {
-  const res = await fetch(url);
-  const htmlText = await res.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlText, 'text/html');
+    const res = await fetch(url);
+    const htmlText = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
 
-  const table = doc.querySelector('table');
-  table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
+    const table = doc.querySelector('table');
+    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
 
-    // Estilo para encabezados (suponemos que están en las primeras dos filas)
+    // Estilo para encabezados (primera y segunda fila)
     for (let i = 0; i < 2; i++) {
-    if (table.rows[i]) {
-      for (let cell of table.rows[i].cells) {
-        cell.style.fontWeight = "bold";
-        cell.style.backgroundColor = "#004c3f";
-        cell.style.color = "white";
-        cell.style.whiteSpace = "nowrap";
+      if (table.rows[i]) {
+        for (let cell of table.rows[i].cells) {
+          cell.style.fontWeight = "bold";
+          cell.style.backgroundColor = "#004c3f";
+          cell.style.color = "white";
+          cell.style.whiteSpace = "nowrap";
+        }
       }
     }
-  }
 
-  // Borrar la primera fila (si existe)
-  if (table.rows[0]) {
-    table.deleteRow(0);
-  }
+    // Eliminar la primera fila (si existe)
+    if (table.rows[0]) table.deleteRow(0);
 
-  // Borrar la primera columna (si existe)
-  for (let i = 0; i < table.rows.length; i++) {
-    if (table.rows[i].cells[0]) {
-      table.rows[i].deleteCell(0);
+    // Eliminar la primera columna (si existe)
+    for (let i = 0; i < table.rows.length; i++) {
+      if (table.rows[i].cells[0]) table.rows[i].deleteCell(0);
     }
+
+    // Insertar tabla con formato
+    document.getElementById("tabla-resultados").appendChild(table);
   }
-
-  // Resaltar las celdas que tengan un número mayor o igual a 200 que estén en las columnas "L1", "L2", "L3", "L4", "L5"
-  const columnsToHighlight = ["L1", "L2", "L3", "L4", "L5"];
-  const headerCells = Array.from(table.rows[0].cells);
-  const columnIndices = headerCells
-  .map((cell, index) => columnsToHighlight.includes(cell.innerText.trim()) ? index : -1)
-  .filter(index => index !== -1);
-  
-  for (let i = 1; i < table.rows.length; i++) {
-    for (const colIndex of columnIndices) {
-      const cell = table.rows[i].cells[colIndex];
-      if (parseFloat(cell.innerText) >= 200) {
-        cell.style.backgroundColor = "#ffeb3b"; // Color amarillo
-      }
-    }
-  }
-  
-    console.log("Columnas destacadas:", columnIndices.map(i => headerCells[i].innerText.trim()));
-
-
-  document.getElementById("tabla-resultados").appendChild(table);
-}
-
 
   fetchSheetAsTable(SHEET_URL);
 </script>
