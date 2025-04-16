@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Resultados Ternas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Reemplaza tu etiqueta <style> con esta versión -->
   <style>
     body {
       background-color: #f5f5f5;
     }
-
+  
     .contenido {
       margin: 2rem auto;
       max-width: 100%;
@@ -18,51 +19,62 @@
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
+  
     h1 {
       margin-bottom: 2rem;
     }
-
+  
     table {
       font-size: 0.95rem;
+      table-layout: fixed;
+      width: 100%;
     }
-
-    /* Responsive table */
+  
     .table-responsive {
       overflow-x: auto;
     }
-
+  
+    .tabla-ajustada th,
+    .tabla-ajustada td {
+      word-wrap: break-word;
+    }
+  
+    .tabla-ajustada th:nth-child(2),
+    .tabla-ajustada td:nth-child(2) {
+      width: 25%;
+    }
+  
     .navbar-custom {
       background-color: #004c3f;
     }
-
+  
     .navbar-custom .nav-link,
     .navbar-custom .navbar-brand {
       color: white;
     }
-
+  
     .navbar-custom .dropdown-menu {
       background-color: white !important;
       color: black !important;
       border: none;
-      box-shadow: none; /* sin elevation */
+      box-shadow: none;
     }
-
+  
     .navbar-custom .dropdown-item {
       color: black !important;
     }
-
+  
     .navbar-custom .dropdown-item:hover {
       background-color: #f0f0f0;
       color: #000;
     }
-
+  
     .logo-img {
       height: 40px;
       margin-right: 10px;
     }
-
-    /* Menú lateral en móviles */
+  
+    /* Menú lateral en móviles + reordenar logo */
     @media (max-width: 768px) {
       .navbar-collapse {
         position: fixed;
@@ -76,29 +88,40 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease-in-out;
       }
-
+  
       .navbar-collapse.show {
         transform: translateX(0);
       }
-
+  
       .navbar-toggler {
         z-index: 1100;
         border: none;
+        background-color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
       }
-
-      body.offcanvas-open {
-        overflow: hidden;
+  
+      .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
       }
-
+  
+      .navbar-brand {
+        order: 2;
+      }
+  
+      .navbar-toggler {
+        order: 1;
+      }
+  
       .contenido {
         padding: 1rem;
       }
-
+  
       table {
         font-size: 0.85rem;
       }
     }
-  </style>
+  </style>  
 </head>
 <body>
 
@@ -111,7 +134,7 @@
       </button>
   
       <!-- Logo y texto a la derecha en móviles -->
-      <a class="navbar-brand fw-bold d-flex align-items-center order-2 order-lg-1 ms-auto" href="#">
+      <a class="navbar-brand fw-bold d-flex align-items-center order-2 order-lg-1 ms-auto" href="../index.html">
         <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
       </a>
   
@@ -124,9 +147,7 @@
               Resultados Torneos
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="torneos/ternas.html">Ternas</a></li>
-              <li><a class="dropdown-item" href="#">Parejas</a></li>
-              <li><a class="dropdown-item" href="#">Individual</a></li>
+              <li><a class="dropdown-item" href="../torneos/ternas.html">Ternas</a></li>
             </ul>
           </li>
           <!-- Menú desplegable 2 -->
@@ -160,7 +181,7 @@
     const doc = parser.parseFromString(htmlText, 'text/html');
 
     const table = doc.querySelector('table');
-    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
+    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "tabla-ajustada");
 
     // Eliminar primera columna (números de fila)
     for (let row of table.rows) {
