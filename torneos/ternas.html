@@ -12,7 +12,7 @@
 
     .contenido {
       margin: 2rem auto;
-      max-width: 95%;
+      max-width: 100%;
       background-color: #ffffff;
       padding: 2rem;
       border-radius: 10px;
@@ -26,13 +26,27 @@
     table {
       font-size: 0.95rem;
     }
+
+    /* Responsive table */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    @media (max-width: 768px) {
+      .contenido {
+        padding: 1rem;
+      }
+      table {
+        font-size: 0.85rem;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="container contenido text-center">
   <h1>Resultados Torneo Ternas</h1>
-  <div id="tabla-resultados" class="mt-4"></div>
+  <div class="table-responsive mt-4" id="tabla-resultados"></div>
 </div>
 
 <script>
@@ -44,11 +58,16 @@
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, 'text/html');
 
-    // Google Sheets published as HTML puts data in the first table
     const table = doc.querySelector('table');
+    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
 
-    // Clean up the table and apply Bootstrap styling
-    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark");
+    // Eliminar primera columna (números de fila)
+    for (let row of table.rows) {
+      if (row.cells.length > 0) {
+        row.deleteCell(0);
+      }
+    }
+
     document.getElementById("tabla-resultados").appendChild(table);
   }
 
