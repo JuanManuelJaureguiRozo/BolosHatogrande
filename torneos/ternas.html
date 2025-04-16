@@ -103,8 +103,8 @@
 
   <nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
-        <img src="img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="../index.html">
+        <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
         <span class="navbar-toggler-icon"></span>
@@ -162,6 +162,7 @@
 
     // Ponerle negrilla a la primera fila (encabezados)
     const headerRow = table.rows[0];
+    print(headerRow);
     for (let cell of headerRow.cells) {
       cell.style.fontWeight = "bold";
     }
@@ -176,6 +177,8 @@
       const cell10 = table.rows[i].cells[10];
       const cell11 = table.rows[i].cells[11];
       cell.style.fontWeight = "bold";
+      cell10.style.fontWeight = "bold";
+      cell11.style.fontWeight = "bold";
     }
 
     document.getElementById("tabla-resultados").appendChild(table);
