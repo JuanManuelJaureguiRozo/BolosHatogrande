@@ -32,10 +32,67 @@
       overflow-x: auto;
     }
 
+    .navbar-custom {
+      background-color: #004c3f;
+    }
+
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-brand {
+      color: white;
+    }
+
+    .navbar-custom .dropdown-menu {
+      background-color: white !important;
+      color: black !important;
+      border: none;
+      box-shadow: none; /* sin elevation */
+    }
+
+    .navbar-custom .dropdown-item {
+      color: black !important;
+    }
+
+    .navbar-custom .dropdown-item:hover {
+      background-color: #f0f0f0;
+      color: #000;
+    }
+
+    .logo-img {
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    /* Menú lateral en móviles */
     @media (max-width: 768px) {
+      .navbar-collapse {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 75%;
+        height: 100%;
+        background-color: #004c3f;
+        padding-top: 3.5rem;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .navbar-collapse.show {
+        transform: translateX(0);
+      }
+
+      .navbar-toggler {
+        z-index: 1100;
+      }
+
+      body.offcanvas-open {
+        overflow: hidden;
+      }
+
       .contenido {
         padding: 1rem;
       }
+
       table {
         font-size: 0.85rem;
       }
@@ -43,6 +100,41 @@
   </style>
 </head>
 <body>
+
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+        <img src="img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+  
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav flex-column flex-lg-row">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Resultados Torneos
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="torneos/ternas.html">Ternas</a></li>
+              <li><a class="dropdown-item" href="#">Parejas</a></li>
+              <li><a class="dropdown-item" href="#">Individual</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Escalafón
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Hombres</a></li>
+              <li><a class="dropdown-item" href="#">Mujeres</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
 <div class="container contenido text-center">
   <h1>Resultados Torneo Ternas</h1>
@@ -66,6 +158,24 @@
       if (row.cells.length > 0) {
         row.deleteCell(0);
       }
+    }
+
+    // Ponerle negrilla a la primera fila (encabezados)
+    const headerRow = table.rows[0];
+    for (let cell of headerRow.cells) {
+      cell.style.fontWeight = "bold";
+    }
+
+    // Cambiar color de fondo de la primera fila (encabezados)
+    headerRow.style.backgroundColor = "#004c3f";
+    headerRow.style.color = "#ffffff";
+
+    // Ponerle negrilla a la primera columna
+    for (let i = 1; i < table.rows.length; i++) {
+      const cell = table.rows[i].cells[0];
+      const cell10 = table.rows[i].cells[10];
+      const cell11 = table.rows[i].cells[11];
+      cell.style.fontWeight = "bold";
     }
 
     document.getElementById("tabla-resultados").appendChild(table);
