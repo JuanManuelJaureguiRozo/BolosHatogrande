@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resultados Ternas</title>
+  <title>Escalafón Masculino - Abril 2025</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -160,7 +160,7 @@
               Escalafón
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Hombres</a></li>
+              <li><a class="dropdown-item" href="../torneos/escalafon_masc.html">Hombres</a></li>
               <li><a class="dropdown-item" href="#">Mujeres</a></li>
             </ul>
           </li>
@@ -171,53 +171,53 @@
   </nav>  
 
 <div class="container contenido text-center">
-  <h1>Resultados Torneo Ternas</h1>
+  <h1>Escalafón Masculino - Abril 2025</h1>
   <div class="table-responsive mt-4" id="tabla-resultados"></div>
 </div>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTEFU5_WZT6youbMA8E7d7e_Ta7RhVd1WM6Xu8TicSo2A7ME5QyIF3objDSqzVDPDpQovtnDjT7TUmT/pubhtml?gid=0&single=true";
-
-  async function fetchSheetAsTable(url) {
-  const res = await fetch(url);
-  const htmlText = await res.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlText, 'text/html');
-
-  const table = doc.querySelector('table');
-  table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
-
-    // Estilo para encabezados (suponemos que están en las primeras dos filas)
-    for (let i = 0; i < 2; i++) {
-    if (table.rows[i]) {
-      for (let cell of table.rows[i].cells) {
-        cell.style.fontWeight = "bold";
-        cell.style.backgroundColor = "#004c3f";
-        cell.style.color = "white";
-        cell.style.whiteSpace = "nowrap";
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu6_D6ie3wF9Efv4GSDNSVC6k25FEdDVJZPnmnd8koReIL_0lNzZqMLvqKlCCHcGmvXVtPKzAmUJMh/pubhtml";
+  
+    async function fetchSheetAsTable(url) {
+    const res = await fetch(url);
+    const htmlText = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+  
+    const table = doc.querySelector('table');
+    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
+  
+      // Estilo para encabezados (suponemos que están en las primeras dos filas)
+      for (let i = 0; i < 2; i++) {
+      if (table.rows[i]) {
+        for (let cell of table.rows[i].cells) {
+          cell.style.fontWeight = "bold";
+          cell.style.backgroundColor = "#004c3f";
+          cell.style.color = "white";
+          cell.style.whiteSpace = "nowrap";
+        }
       }
     }
-  }
-
-  // Borrar la primera fila (si existe)
-  if (table.rows[0]) {
-    table.deleteRow(0);
-  }
-
-  // Borrar la primera columna (si existe)
-  for (let i = 0; i < table.rows.length; i++) {
-    if (table.rows[i].cells[0]) {
-      table.rows[i].deleteCell(0);
+  
+    // Borrar la primera fila (si existe)
+    if (table.rows[0]) {
+      table.deleteRow(0);
     }
+  
+    // Borrar la primera columna (si existe)
+    for (let i = 0; i < table.rows.length; i++) {
+      if (table.rows[i].cells[0]) {
+        table.rows[i].deleteCell(0);
+      }
+    }
+  
+    document.getElementById("tabla-resultados").appendChild(table);
   }
-
-  document.getElementById("tabla-resultados").appendChild(table);
-}
-
-
-  fetchSheetAsTable(SHEET_URL);
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  
+  
+    fetchSheetAsTable(SHEET_URL);
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+  </html>
