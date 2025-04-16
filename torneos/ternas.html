@@ -83,6 +83,7 @@
 
       .navbar-toggler {
         z-index: 1100;
+        border: none;
       }
 
       body.offcanvas-open {
@@ -102,16 +103,22 @@
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-custom">
-    <div class="container-fluid">
-      <a class="navbar-brand fw-bold d-flex align-items-center" href="../index.html">
-        <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      
+      <!-- Botón menú a la izquierda en móviles -->
+      <button class="navbar-toggler order-1 order-lg-0 ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
         <span class="navbar-toggler-icon"></span>
       </button>
   
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <!-- Logo y texto a la derecha en móviles -->
+      <a class="navbar-brand fw-bold d-flex align-items-center order-2 order-lg-1 ms-auto" href="#">
+        <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
+      </a>
+  
+      <!-- Menú colapsable -->
+      <div class="collapse navbar-collapse order-3 order-lg-2" id="navbarNavDropdown">
         <ul class="navbar-nav flex-column flex-lg-row">
+          <!-- Menú desplegable 1 -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
               Resultados Torneos
@@ -122,6 +129,7 @@
               <li><a class="dropdown-item" href="#">Individual</a></li>
             </ul>
           </li>
+          <!-- Menú desplegable 2 -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
               Escalafón
@@ -133,8 +141,9 @@
           </li>
         </ul>
       </div>
+  
     </div>
-  </nav>
+  </nav>  
 
 <div class="container contenido text-center">
   <h1>Resultados Torneo Ternas</h1>
@@ -160,18 +169,16 @@
       }
     }
 
-    // Ponerle negrilla a la primera fila (encabezados)
-    const headerRow = table.rows[0];
-    print(headerRow);
-    for (let cell of headerRow.cells) {
+    // Eliminar primera fila (encabezados de columna)
+    table.deleteRow(0);
+
+    for (let cell of table.rows[0].cells) {
       cell.style.fontWeight = "bold";
+      cell.style.backgroundColor = "#004c3f";
+      cell.style.color = "white";
     }
 
-    // Cambiar color de fondo de la primera fila (encabezados)
-    headerRow.style.backgroundColor = "#004c3f";
-    headerRow.style.color = "#ffffff";
-
-    // Ponerle negrilla a la primera columna
+    // Ponerle negrilla a algunas columnas
     for (let i = 1; i < table.rows.length; i++) {
       const cell = table.rows[i].cells[0];
       const cell10 = table.rows[i].cells[10];
