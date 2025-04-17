@@ -231,12 +231,14 @@
     // Verificar los elementos de lines y en la tabla resaltar en amarillo los que son mayores a 200
     for (let i = 0; i < lines.length; i++) {
       for (let j = 0; j < lines[i].length; j++) {
-        if (parseInt(lines[i][j]) > 200) {
-          // Si estamos en la primera fila
-          if (i === 0) {
-            table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b";
-          } else {
-            table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b";
+        if (parseInt(lines[i][j]) >= 200) {
+          // Si estamos en la fila 0, 3, 6, etc., resaltar la celda en la tabla
+          if (i % 3 === 0) {
+            table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
+          } else if (i % 3 === 1) { // Si estamos en alguna fila con indice 1, 4, 7, etc. (jugador 2)
+            table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
+          } else { // Si estamos en alguna fila con indice 2, 5, 8, etc. (jugador 3)
+            table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
           }
         }
       }
