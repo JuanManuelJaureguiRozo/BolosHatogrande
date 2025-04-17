@@ -245,6 +245,7 @@
     // Cacular la línea más alta sin HCP
     let lineaSinHCP = 0;
     let bestGroupIndex = -1;
+    let maxIndex = -1;
 
     // Recorrer los grupos de 3 en 3
     for (let i = 0; i < lines.length; i += 3) {
@@ -263,6 +264,7 @@
       if (groupSum > lineaSinHCP) {
         lineaSinHCP = groupSum;
         bestGroupIndex = i; // Guardar el índice del grupo
+        maxIndex = positionalSums.indexOf(groupSum) + 1;
       }
     }
 
@@ -295,9 +297,6 @@
     // Tomar solo el elemento antes de la primera coma de cada subarray
     const nombresTernaMayorLinea = bestGroupNames.map(name => name.split(",")[0]);
 
-    // Insertar tabla con formato
-    document.getElementById("tabla-resultados").appendChild(table);
-
     //------------------------------LÓGICA LÍNEA CON HCP----------------------------------//
 
     // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
@@ -322,6 +321,7 @@
     // Cacular la línea más alta con HCP
     let lineaConHCP = 0;
     let bestGroupIndex1 = -1;
+    let maxIndex1 = -1;
 
     // Recorrer los grupos de 3 en 3
     for (let i = 0; i < lines1.length; i += 3) {
@@ -348,6 +348,7 @@
       if (groupSum1 > lineaConHCP) {
         lineaConHCP = groupSum1;
         bestGroupIndex1 = i; // Guardar el índice del grupo
+        maxIndex1 = positionalSums1.indexOf(groupSum1);
       }
     }
 
@@ -387,15 +388,19 @@
     statsDiv.classList.add("mt-4", "text-center");
     statsDiv.innerHTML = `
     <h2>Estadísticas del Torneo</h2>
-    <p>La línea más alta sin HCP fue: <strong>${lineaSinHCP}</strong></p>
+    <p>La línea más alta sin HCP fue: <strong>${lineaSinHCP}</strong> en la línea de juego <strong>L${maxIndex}</strong></p>
     <p>Los jugadores de la terna con la línea más alta sin HCP son: <strong>${nombresTernaMayorLinea.join(", ")}</strong></p>
-    <p>La línea más alta con HCP fue: <strong>${lineaConHCP}</strong></p>
+    <p>La línea más alta con HCP fue: <strong>${lineaConHCP}</strong> en la línea de juego <strong>L${maxIndex1}</strong></p>
     <p>Los jugadores de la terna con la línea más alta con HCP son: <strong>${nombresTernaMayorLinea1.join(", ")}</strong></p>`;
     document.querySelector(".contenido").appendChild(statsDiv);
+
+    // Insertar tabla con formato
+    document.getElementById("tabla-resultados").appendChild(table);
+
+    return table;
   }
 
-  fetchSheetAsTable(SHEET_URL);
-
+  const table = fetchSheetAsTable(SHEET_URL);
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
