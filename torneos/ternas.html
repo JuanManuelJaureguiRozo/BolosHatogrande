@@ -211,7 +211,7 @@
 
     // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
     const lines = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(2, 8).map(cell => cell.innerText.trim());
+      return Array.from(row.cells).slice(2, 13).map(cell => cell.innerText.trim());
     });
 
     // En lines, quitar el último elemento de cada subarray empezando en la posición 1, 2, 4, 5, 7, 8, etc.
@@ -254,7 +254,7 @@
       const group = lines.slice(i, i + 3); // Obtener 3 subarrays
 
       // Sumar los elementos por posición
-      const positionalSums = [0, 0, 0, 0, 0];
+      const positionalSums = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       for (let j = 0; j < group.length; j++) {
         for (let k = 0; k < group[j].length; k++) {
           positionalSums[k] += parseInt(group[j][k], 10);
@@ -303,7 +303,7 @@
 
     // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
     const lines1 = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(1, 8).map(cell => cell.innerText.trim());
+      return Array.from(row.cells).slice(1, 13).map(cell => cell.innerText.trim());
     });
 
     // En lines, quitar el último elemento de cada subarray empezando en la posición 1, 2, 4, 5, 7, 8, etc.
@@ -330,7 +330,7 @@
       const group1 = lines1.slice(i, i + 3); // Obtener 3 subarrays
 
       // Sumar los elementos por posición ignorando la posición 0
-      const positionalSums1 = [0, 0, 0, 0, 0, 0];
+      const positionalSums1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       for (let j = 0; j < group1.length; j++) {
         for (let k = 0; k < group1[j].length; k++) {
           positionalSums1[k] += parseInt(group1[j][k], 10);
