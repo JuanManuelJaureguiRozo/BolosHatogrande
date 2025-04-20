@@ -261,7 +261,12 @@
         }
       }
 
-      // Obtener el máximo de la suma de posiciones
+      // Obtener el máximo de la suma de posiciones evitando los NaN
+      for (let k = 0; k < positionalSums.length; k++) {
+        if (isNaN(positionalSums[k])) {
+          positionalSums[k] = 0; // Asignar 0 si es NaN
+        }
+      }
       const groupSum = Math.max(...positionalSums);
       if (groupSum > lineaSinHCP) {
         lineaSinHCP = groupSum;
@@ -346,6 +351,11 @@
       }
 
       // Obtener el máximo de la suma de posiciones
+      for (let k = 0; k < positionalSums1.length; k++) {
+        if (isNaN(positionalSums1[k])) {
+          positionalSums1[k] = 0; // Asignar 0 si es NaN
+        }
+      }
       const groupSum1 = Math.max(...positionalSums1);
       if (groupSum1 > lineaConHCP) {
         lineaConHCP = groupSum1;
