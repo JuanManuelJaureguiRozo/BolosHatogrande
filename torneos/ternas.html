@@ -356,11 +356,20 @@
           positionalSums1[k] = 0; // Asignar 0 si es NaN
         }
       }
+
       const groupSum1 = Math.max(...positionalSums1);
       if (groupSum1 > lineaConHCP) {
-        lineaConHCP = groupSum1;
-        bestGroupIndex1 = i; // Guardar el índice del grupo
-        maxIndex1 = positionalSums1.indexOf(groupSum1);
+        // Si el máximo es la posición 0, no lo consideramos y asignamos 0
+        if (maxIndex1 === 0) {
+          lineaConHCP = 0;
+          bestGroupIndex1 = -1; // No hay grupo válido
+          maxIndex = 0;
+        }
+        else {
+          lineaConHCP = groupSum1;
+          bestGroupIndex1 = i; // Guardar el índice del grupo
+          maxIndex1 = positionalSums1.indexOf(groupSum1);
+        }
       }
     }
 
