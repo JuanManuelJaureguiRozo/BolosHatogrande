@@ -54,7 +54,7 @@
     .navbar-custom .dropdown-menu {
       background-color: white !important;
       color: black !important;
-      border: none;
+      border: 1px solid #004c3f;
       box-shadow: none;
     }
   
@@ -151,6 +151,8 @@
               Resultados Torneos
             </a>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="../torneos/individual_masculino.html">Individual Masculino</a></li>
+              <li><a class="dropdown-item" href="../torneos/individual_femenino.html">Individual Femenino</a></li>
               <li><a class="dropdown-item" href="../torneos/ternas.html">Ternas</a></li>
             </ul>
           </li>
@@ -187,8 +189,8 @@
     const table = doc.querySelector('table');
     table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
   
-      // Estilo para encabezados (suponemos que están en las primeras dos filas)
-      for (let i = 0; i < 2; i++) {
+    // Estilo para encabezado de la tabla
+    for (let i = 0; i < 2; i++) {
       if (table.rows[i]) {
         for (let cell of table.rows[i].cells) {
           cell.style.fontWeight = "bold";
@@ -208,6 +210,49 @@
     for (let i = 0; i < table.rows.length; i++) {
       if (table.rows[i].cells[0]) {
         table.rows[i].deleteCell(0);
+      }
+    }
+
+    // Colores distintos para cada categoría
+    const categoryColors = {
+      "CATEGORIA ELITE": "#cce5ff",     // azul claro
+      "PRIMERA CATEGORIA": "#d4edda",   // verde claro
+      "SEGUNDA CATEGORIA": "#fff3cd",    // amarillo claro
+      "TERCERA CATEGORIA": "#f8d7da",  // rojo claro
+      "CUARTA CATEGORIA": "#d2b4de",   // morado claro
+      "PROCESO DE ESCALAFON": "#fad7a0",    // naranja claro
+    };
+
+    // Poner negrilla a los encabezados de las columnas
+    const row = table.rows[1];
+    for (let j = 0; j < row.cells.length; j++) {
+      const cell = row.cells[j];
+      cell.style.fontWeight = "bold";
+    }
+
+    // Pintar las celdas de cada categoría
+    for (let row of table.rows) {
+      const categoryCell = row.cells[1];
+      if (categoryCell) {
+        const categoryText = categoryCell.textContent.trim().toUpperCase();
+        if (categoryColors[categoryText]) {
+          categoryCell.style.backgroundColor = categoryColors[categoryText];
+          categoryCell.style.color = "black";
+          categoryCell.style.fontWeight = "bold";
+        }
+      }
+    }
+
+    // Resaltar puntajes mayores a 200 solo en columnas 2 a 25
+    for (let row of table.rows) {
+      for (let colIndex = 2; colIndex <= 25; colIndex++) {
+        const cell = row.cells[colIndex];
+        if (cell) {
+          const value = parseInt(cell.textContent.trim());
+          if (!isNaN(value) && value > 200) {
+            cell.style.backgroundColor = "yellow";
+          }
+        }
       }
     }
   
