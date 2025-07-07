@@ -75,7 +75,7 @@
       display: block;
     }
 
-        @media (max-width: 992px) {
+    @media (max-width: 992px) {
       .navbar-collapse {
         position: fixed;
         top: 0;
@@ -124,29 +124,37 @@
     }
 
     @media (max-width: 992px) {
-      .navbar-nav .dropdown-menu {
-        position: static;
-        float: none;
-        display: none;
-        background-color: transparent;
-        border: none;
-        box-shadow: none;
-        padding-left: 1rem;
-      }
+  .navbar-nav .dropdown-menu {
+    position: static !important;
+    display: none;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding-left: 1rem;
+    margin-top: 0;
+  }
 
-      .navbar-nav .dropdown-menu.show {
-        display: block;
-      }
+  .navbar-nav .dropdown-menu.show {
+    display: block !important;
+  }
 
-      .navbar-nav .dropdown-item {
-        color: white !important;
-      }
+  .navbar-nav .dropdown-item {
+    color: #fff !important;
+    padding-left: 1rem;
+  }
 
-      .navbar-nav .dropdown-item:hover {
-        background-color: rgba(255,255,255,0.2);
-      }
-    }
-    
+  .navbar-nav .dropdown-item:hover {
+    background-color: rgba(255,255,255,0.1);
+  }
+
+  .dropdown-toggle::after {
+    float: right;
+    margin-top: 7px;
+    transform: rotate(90deg);
+  }
+}
+
+
     .section-title {
       margin-top: 3rem;
       margin-bottom: 1.5rem;
@@ -321,7 +329,6 @@
 </script>
 
 <script>
-  // Corrige los dropdowns dentro del navbar colapsable en móvil
   document.querySelectorAll('.navbar-nav .dropdown-toggle').forEach(dropdown => {
     dropdown.addEventListener('click', function (e) {
       if (window.innerWidth < 992) {
@@ -333,7 +340,7 @@
           nextEl.classList.toggle('show');
         }
 
-        // Cierra otros dropdowns abiertos
+        // Cierra los demás dropdowns
         document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
           if (menu !== nextEl) menu.classList.remove('show');
         });
