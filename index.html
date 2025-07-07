@@ -255,31 +255,6 @@
     </div>
   </section>
 
-  <!-- CARRUSEL DE VIDEOS -->
-  <section class="container mt-5">
-    <h2 class="section-title">Videos Destacados</h2>
-    <div id="videoCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <iframe src="https://www.youtube.com/embed/WpSD5CIgezM" frameborder="0" allowfullscreen></iframe>
-        </div>
-        <div class="carousel-item ">
-          <iframe src="https://www.youtube.com/embed/dblDkYBf9Vo" frameborder="0" allowfullscreen></iframe>
-        </div>
-        <div class="carousel-item ">
-          <iframe src="https://www.youtube.com/embed/oa41464mWGY" frameborder="0" allowfullscreen></iframe>
-        </div>
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#videoCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#videoCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-      </button>
-    </div>
-  </section>
-
-
   <!-- SECCIÓN DE NOTICIAS -->
   <section id="noticias" class="container mt-5">
     <h2 class="section-title">Noticias Recientes</h2>
@@ -338,27 +313,6 @@
     bsCollapse.hide();
   });
   
-</script>
-
-<script>
-  document.querySelectorAll('.navbar-nav .dropdown-toggle').forEach(dropdown => {
-    dropdown.addEventListener('click', function (e) {
-      if (window.innerWidth < 992) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-
-        const nextEl = this.nextElementSibling;
-        if (nextEl && nextEl.classList.contains('dropdown-menu')) {
-          nextEl.classList.toggle('show');
-        }
-
-        // Cierra los demás dropdowns
-        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-          if (menu !== nextEl) menu.classList.remove('show');
-        });
-      }
-    });
-  });
 </script>
 
   <!-- Bootstrap Icons -->
