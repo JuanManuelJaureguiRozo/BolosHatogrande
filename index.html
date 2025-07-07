@@ -102,6 +102,25 @@
       font-size: 1.5rem;
       color: white;
     }
+
+    .carousel-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto; /* Let it grow based on content */
+    padding: 1rem 0;
+  }
+
+  .carousel-inner {
+    width: 100%;
+  }
+
+  .carousel iframe {
+    width: 100%;
+    max-width: 900px; /* You can tweak this */
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
   </style>
 </head>
 <body>
@@ -171,36 +190,31 @@
       <div class="carousel-inner">
 
         <div class="carousel-item active">
-          <iframe width="400" height="315"
-                  src="https://www.youtube.com/embed/WpSD5CIgezM"
-                  title="YouTube video player"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen>
-          </iframe>
+          <div class="ratio ratio-16x9">
+            <iframe src="https://www.youtube.com/embed/WpSD5CIgezM"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+          </div>
         </div>
 
-        <div class="carousel-item">
-          <iframe width="400" height="315"
-                  src="https://www.youtube.com/embed/dblDkYBf9Vo"
-                  title="YouTube video player"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen>
-          </iframe>
+        <div class="carousel-item active">
+          <div class="ratio ratio-16x9">
+            <iframe src="https://www.youtube.com/embed/dblDkYBf9Vo"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+          </div>
         </div>
 
-        <div class="carousel-item">
-          <iframe width="400" height="315"
-                  src="https://www.youtube.com/embed/oa41464mWGY"
-                  title="YouTube video player"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen>
-          </iframe>
+        <div class="carousel-item active">
+          <div class="ratio ratio-16x9">
+            <iframe src="https://www.youtube.com/embed/oa41464mWGY"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+          </div>
         </div>
-
-      </div>
 
       <button class="carousel-control-prev" type="button" data-bs-target="#videoCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon"></span>
