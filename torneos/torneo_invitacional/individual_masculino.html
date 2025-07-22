@@ -164,7 +164,7 @@
       </button>
   
       <!-- Logo y texto a la derecha en móviles -->
-      <a class="navbar-brand fw-bold d-flex align-items-center order-2 order-lg-1 ms-auto" href="../index.html">
+      <a class="navbar-brand fw-bold d-flex align-items-center order-2 order-lg-1 ms-auto" href="../../index.html">
         <img src="../../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
       </a>
   
@@ -264,7 +264,7 @@
 
     //-------------------------------------VISUALIZACIÓN----------------------------------//
 
-        // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
+    // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
     const lines = Array.from(table.rows).slice(1).map(row => {
       return Array.from(row.cells).slice(3, 8).map(cell => cell.innerText.trim());
     });
