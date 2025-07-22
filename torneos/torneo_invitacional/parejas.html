@@ -266,7 +266,7 @@
 
     // Revisar las líneas de cada jugador y almacenar en un array las 10 líneas
     const lines = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(2, 13).map(cell => cell.innerText.trim());
+      return Array.from(row.cells).slice(2, 8).map(cell => cell.innerText.trim());
     });
 
     for (let i = 0; i < lines.length; i++) {
