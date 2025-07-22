@@ -264,6 +264,23 @@
 
     //-------------------------------------VISUALIZACIÓN----------------------------------//
 
+        // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
+    const lines = Array.from(table.rows).slice(1).map(row => {
+      return Array.from(row.cells).slice(3, 8).map(cell => cell.innerText.trim());
+    });
+
+    console.log(lines);
+
+    // Verificar los elementos de lines y en la tabla resaltar en amarillo los que son mayores a 200
+    for (let i = 0; i < lines.length; i++) {
+      for (let j = 0; j < lines[i].length; j++) {
+        if (parseInt(lines[i][j]) >= 200) {
+          // Resaltar en amarillo los elementos mayores a 200
+          table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b";
+        }
+      }
+    }
+
     // Insertar tabla con formato
     document.getElementById("tabla-resultados").appendChild(table);
 
