@@ -231,7 +231,7 @@
   </footer>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiHKvgJpfxx376CMR2gxC4dcVrqWiipuDWPXGipodWrLEKoLRBYSMSaRcPr4kwltg-qxvkuffa3jNC/pubhtml";
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiHKvgJpfxx376CMR2gxC4dcVrqWiipuDWPXGipodWrLEKoLRBYSMSaRcPr4kwltg-qxvkuffa3jNC/pubhtml?gid=1797297468&single=true";
 
   async function fetchSheetAsTable(url) {
     const res = await fetch(url);
@@ -262,56 +262,7 @@
       if (table.rows[i].cells[0]) table.rows[i].deleteCell(0);
     }
 
-    //------------------------------LÓGICA LÍNEA SIN HCP----------------------------------//
-
-    // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
-    const lines = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(2, 7).map(cell => cell.innerText.trim());
-    });
-
-    // Verificar los elementos de lines y en la tabla resaltar en amarillo los que son mayores a 200
-    for (let i = 0; i < lines.length; i++) {
-      for (let j = 0; j < lines[i].length; j++) {
-        if (parseInt(lines[i][j]) >= 200) {
-          // Resaltar en amarillo los elementos mayores a 200
-          table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b";
-        }
-      }
-    }
-
-    // Cacular la línea más alta sin HCP
-    let lineaSinHCP = 0;
-    let maxIndex = -1;
-
-    // Obtener la línea más alta sin HCP de cada subarray
-    for (let i = 0; i < lines.length; i++) {
-
-      // Obtener el máximo del subgrupo de 5 líneas que no sea NaN o vacío
-      const maxLine = Math.max(...lines[i].map(line => {
-        const num = parseInt(line);
-        return isNaN(num) ? -Infinity : num;
-      }));
-
-      // Si el máximo es mayor que la líneaSinHCP actual, actualizarla
-      if (maxLine > lineaSinHCP) {
-        lineaSinHCP = maxLine;
-        maxIndex = i; // Guardar el índice de la línea
-      }
-    }
-
-    // Obtener el nombre del jugador con la línea más alta sin HCP
-    const jugadorMayorLinea = table.rows[maxIndex + 1].cells[1].innerText.trim();
-
     //-------------------------------------VISUALIZACIÓN----------------------------------//
-
-    // Mostrar estadísticas del torneo debajo de la tabla de resultados
-    const statsDiv = document.createElement("div");
-    statsDiv.classList.add("mt-4", "text-center");
-    statsDiv.innerHTML = `
-    <h2>Estadísticas del Torneo</h2>
-    <p>La línea más alta sin HCP fue: <strong>${lineaSinHCP}</strong> en la línea de juego <strong>L${maxIndex}</strong></p>
-    <p>El jugador con la línea más alta sin HCP es: <strong>${jugadorMayorLinea}</strong></p>`;
-    document.querySelector(".contenido").appendChild(statsDiv);
 
     // Insertar tabla con formato
     document.getElementById("tabla-resultados").appendChild(table);
