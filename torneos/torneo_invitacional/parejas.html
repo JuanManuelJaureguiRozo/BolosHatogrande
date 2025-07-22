@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resultados Individual Masculino</title>
+  <title>Resultados Torneo Invitacional 2025 - Parejas</title>
   <link rel="icon" href="img/faviconHG.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -80,7 +80,7 @@
     }
   
     .navbar-custom .dropdown-item:hover {
-      background-color: #f0f0f0;
+      background-color: #91a7a3;
       color: #000;
     }
   
@@ -104,6 +104,7 @@
       display: block;
     }
   
+    /* Menú lateral en móviles + reordenar logo */
     @media (max-width: 992px) {
       .navbar-collapse {
         position: fixed;
@@ -185,7 +186,7 @@
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="../torneos/individual_masculino.html">Individual Masculino</a></li>
               <li><a class="dropdown-item" href="../torneos/individual_femenino.html">Individual Femenino</a></li>
-              <li><a class="dropdown-item" href="../torneos/parejas.html">Parejas</a></li>
+                <li><a class="dropdown-item" href="../torneos/parejas.html">Parejas</a></li>
               <li><a class="dropdown-item" href="../torneos/ternas.html">Ternas</a></li>
             </ul>
           </li>
@@ -213,13 +214,12 @@
           </li>
         </ul>
       </div>
-  
     </div>
   </nav>
-<div id="menu-overlay" class="menu-overlay"></div> 
+<div id="menu-overlay" class="menu-overlay"></div>  
 
 <div class="container contenido text-center">
-  <h1>Resultados Torneo Individual Masculino</h1>
+  <h1>Resultados Torneo Invitacional 2025 - Parejas</h1>
   <div class="table-responsive mt-4" id="tabla-resultados"></div>
 </div>
 
@@ -231,7 +231,7 @@
   </footer>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvXeUu5qsKi60YfH71ko3-jRQUz3VAJ4gGlkBcB2E5PNj_6AM5SyUwB-GETOIjbWVOQkgei21l5KIU/pubhtml?gid=737818321&single=true";
+  const SHEET_URL = "";
 
   async function fetchSheetAsTable(url) {
     const res = await fetch(url);
@@ -262,67 +262,177 @@
       if (table.rows[i].cells[0]) table.rows[i].deleteCell(0);
     }
 
-    // Colores distintos para cada categoría
-    const categoryColors = {
-      "CATEGORÍA ELITE": "#cce5ff",     // azul claro
-      "PRIMERA CATEGORÍA": "#d4edda",   // verde claro
-      "SEGUNDA CATEGORÍA": "#fff3cd",    // amarillo claro
-      "TERCERA CATEGORÍA": "#f8d7da",  // rojo claro
-      "CUARTA CATEGORÍA": "#d2b4de",   // morado claro
-    };
-
-    // Pintar las celdas de cada categoría
-    for (let row of table.rows) {
-      const categoryCell = row.cells[0];
-      if (categoryCell) {
-        const categoryText = categoryCell.textContent.trim().toUpperCase();
-        if (categoryColors[categoryText]) {
-          categoryCell.style.backgroundColor = categoryColors[categoryText];
-          categoryCell.style.color = "black";
-          categoryCell.style.fontWeight = "bold";
-        }
-      }
-    }
-
     //------------------------------LÓGICA LÍNEA SIN HCP----------------------------------//
 
     // Revisar las líneas de cada jugador y almacenar en un array las 10 líneas
     const lines = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(2, 12).map(cell => cell.innerText.trim());
+      return Array.from(row.cells).slice(2, 13).map(cell => cell.innerText.trim());
     });
 
+    for (let i = 0; i < lines.length; i++) {
+      if (i % 2 === 0) {
+        lines[i].shift(); // Quitar el primer elemento de las filas 0, 2, 4, 6, etc.
+      } else {
+        lines[i].pop(); // Quitar el último elemento de las filas 1, 3, 5, 7, etc.
+      }
+    }
+    
     // Verificar los elementos de lines y en la tabla resaltar en amarillo los que son mayores a 200
     for (let i = 0; i < lines.length; i++) {
       for (let j = 0; j < lines[i].length; j++) {
         if (parseInt(lines[i][j]) >= 200) {
-          // Resaltar en amarillo los elementos mayores a 200
-          table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b";
+          // Si estamos en la fila 0, 2, 4, 6
+          if (i % 2 === 0) {
+            table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
+          } 
+          else { // Si estamos en la fila 1, 3, 5, 7
+            table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
+          }
         }
       }
     }
 
     // Cacular la línea más alta sin HCP
     let lineaSinHCP = 0;
+    let bestGroupIndex = -1;
     let maxIndex = -1;
 
-    // Obtener la línea más alta sin HCP de cada subarray
-    for (let i = 0; i < lines.length; i++) {
+    // Recorrer los grupos de 2 en 2
+    for (let i = 0; i < lines.length; i += 2) {
+      const group = lines.slice(i, i + 2); // Obtener 2 subarrays
 
-      // Obtener el máximo del subgrupo de 10 líneas que no sea NaN o vacío
-      const maxLine = Math.max(...lines[i].map(line => {
-        const num = parseInt(line);
-        return isNaN(num) ? -Infinity : num;
-      }));
+      // Sumar los elementos por posición
+      const positionalSums = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (let j = 0; j < group.length; j++) {
+        for (let k = 0; k < group[j].length; k++) {
+          positionalSums[k] += parseInt(group[j][k], 10);
+        }
+      }
 
-      // Si el máximo es mayor que la líneaSinHCP actual, actualizarla
-      if (maxLine > lineaSinHCP) {
-        lineaSinHCP = maxLine;
-        maxIndex = i; // Guardar el índice de la línea
+      // Obtener el máximo de la suma de posiciones evitando los NaN
+      for (let k = 0; k < positionalSums.length; k++) {
+        if (isNaN(positionalSums[k])) {
+          positionalSums[k] = 0; // Asignar 0 si es NaN
+        }
+      }
+
+      const groupSum = Math.max(...positionalSums);
+      if (groupSum > lineaSinHCP) {
+        lineaSinHCP = groupSum;
+        bestGroupIndex = i; // Guardar el índice del grupo
+        maxIndex = positionalSums.indexOf(groupSum) + 1;
       }
     }
 
-    // Obtener el nombre del jugador con la línea más alta sin HCP
-    const jugadorMayorLinea = table.rows[maxIndex + 1].cells[1].innerText.trim();
+    // A partir de las líneas del mejor grupo, obtener los nombres de los jugadores
+    const bestGroup = lines.slice(bestGroupIndex, bestGroupIndex + 2);
+    
+    const names_lines = Array.from(table.rows).slice(1).map(row => {
+      return Array.from(row.cells).slice(0, 8).map(cell => cell.innerText.trim());
+    });
+
+    for (let i = 0; i < names_lines.length; i++) {
+      if (i % 2 === 0) {
+        names_lines[i].shift(); // Quitar el primer elemento de las filas 0, 2, 4, 6, etc.
+      } else {
+        names_lines[i].pop(); // Quitar el último elemento de las filas 1, 3, 5, 7, etc.
+      }
+    }
+
+    // Obtener los nombres de los jugadores del mejor grupo
+    const bestGroupNames = bestGroup.map((_, index) => {
+      return names_lines[bestGroupIndex + index].slice(0, 8).join(", ");
+    });
+
+    // Tomar solo el elemento antes de la primera coma de cada subarray
+    const nombresParejaMayorLinea = bestGroupNames.map(name => name.split(",")[0]);
+
+    //------------------------------LÓGICA LÍNEA CON HCP----------------------------------//
+
+    // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
+    const lines1 = Array.from(table.rows).slice(1).map(row => {
+      return Array.from(row.cells).slice(1, 13).map(cell => cell.innerText.trim());
+    });
+
+    for (let i = 0; i < lines1.length; i++) {
+      if (i % 2 === 0) {
+        lines1[i].shift(); // Quitar el primer elemento de las filas 0, 2, 4, 6, etc.
+      } else {
+        lines1[i].pop(); // Quitar el último elemento de las filas 1, 3, 5, 7, etc.
+      }
+    }
+
+    // Cacular la línea más alta con HCP
+    let lineaConHCP = 0;
+    let bestGroupIndex1 = -1;
+    let maxIndex1 = -1;
+
+    // Recorrer los grupos de 2 en 2
+    for (let i = 0; i < lines1.length; i += 2) {
+      const group1 = lines1.slice(i, i + 2); // Obtener 2 subarrays
+      console.log(group1);
+
+      // Sumar los elementos por posición ignorando la posición 0
+      const positionalSums1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (let j = 0; j < group1.length; j++) {
+        for (let k = 0; k < group1[j].length; k++) {
+          positionalSums1[k] += parseInt(group1[j][k], 10);
+        }
+      }
+
+      // HCP total
+      const hcpTotal = positionalSums1[0]
+
+      // Sumar HCP total a las sumas de posiciones
+      for (let k = 1; k < positionalSums1.length; k++) {
+        positionalSums1[k] += hcpTotal;
+      }
+
+      // Obtener el máximo de la suma de posiciones
+      for (let k = 0; k < positionalSums1.length; k++) {
+        if (isNaN(positionalSums1[k])) {
+          positionalSums1[k] = 0; // Asignar 0 si es NaN
+        }
+      }
+
+      const groupSum1 = Math.max(...positionalSums1);
+      if (groupSum1 > lineaConHCP) {
+        // Si el máximo es la posición 0, no lo consideramos y asignamos 0
+        if (maxIndex1 === 0) {
+          lineaConHCP = 0;
+          bestGroupIndex1 = -1; // No hay grupo válido
+          maxIndex = 0;
+        }
+        else {
+          lineaConHCP = groupSum1;
+          bestGroupIndex1 = i; // Guardar el índice del grupo
+          maxIndex1 = positionalSums1.indexOf(groupSum1);
+        }
+      }
+    }
+
+    // A partir de las líneas del mejor grupo, obtener los nombres de los jugadores
+    const bestGroup1 = lines1.slice(bestGroupIndex1, bestGroupIndex1 + 2);
+    
+    const names_lines1 = Array.from(table.rows).slice(1).map(row => {
+      return Array.from(row.cells).slice(0, 8).map(cell => cell.innerText.trim());
+    });
+
+    for (let i = 0; i < names_lines1.length; i++) {
+      if (i % 2 === 0) {
+        names_lines1[i].shift(); // Quitar el primer elemento de las filas 0, 2, 4, 6, etc.
+      } else {
+        names_lines1[i].pop(); // Quitar el último elemento de las filas 1, 3, 5, 7, etc.
+      }
+    }
+
+    // Obtener los nombres de los jugadores del mejor grupo
+    const bestGroupNames1 = bestGroup1.map((_, index) => {
+      return names_lines1[bestGroupIndex1 + index].slice(0, 8).join(", ");
+    });
+
+    // Tomar solo el elemento antes de la primera coma de cada subarray
+    const nombresParejaMayorLinea1 = bestGroupNames1.map(name => name.split(",")[0]);
 
     //-------------------------------------VISUALIZACIÓN----------------------------------//
 
@@ -332,7 +442,9 @@
     statsDiv.innerHTML = `
     <h2>Estadísticas del Torneo</h2>
     <p>La línea más alta sin HCP fue: <strong>${lineaSinHCP}</strong> en la línea de juego <strong>L${maxIndex}</strong></p>
-    <p>El jugador con la línea más alta sin HCP es: <strong>${jugadorMayorLinea}</strong></p>`;
+    <p>Los jugadores de la pareja con la línea más alta sin HCP son: <strong>${nombresParejaMayorLinea.join(", ")}</strong></p>
+    <p>La línea más alta con HCP fue: <strong>${lineaConHCP}</strong> en la línea de juego <strong>L${maxIndex1}</strong></p>
+    <p>Los jugadores de la pareja con la línea más alta con HCP son: <strong>${nombresParejaMayorLinea1.join(", ")}</strong></p>`;
     document.querySelector(".contenido").appendChild(statsDiv);
 
     // Insertar tabla con formato
