@@ -269,16 +269,16 @@
       return Array.from(row.cells).slice(2, 8).map(cell => cell.innerText.trim());
     });
 
-    // En lines, quitar el último elemento de cada subarray empezando en la posición 1, 2, 4, 5, 7, 8, etc.
+    // En lines, quitar el último elemento de cada subarray menos las posiciones 0, 6, 12, etc.
     for (let i = 0; i < lines.length; i++) {
-      if (i % 3 !== 0) {
-        lines[i].pop();
+      if (i % 6 !== 0) { // Si no es la primera línea de cada grupo
+        lines[i].pop(); // Eliminar el último elemento
       }
     }
 
-    // En lines, quitar el primer elemento del subarray en las posiciones 0, 3, 6, etc.
+    // En lines quitar el primer elemento de las posiciones 0, 6, 12, etc.
     for (let i = 0; i < lines.length; i++) {
-      if (i % 3 === 0) {
+      if (i % 6 === 0) {
         lines[i].shift();
       }
     }
@@ -288,9 +288,9 @@
       for (let j = 0; j < lines[i].length; j++) {
         if (parseInt(lines[i][j]) >= 200) {
           // Si estamos en la fila 0, 3, 6, etc., resaltar la celda en la tabla
-          if (i % 3 === 0) {
+          if (i % 6 === 0) {
             table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
-          } else if (i % 3 === 1) { // Si estamos en alguna fila con indice 1, 4, 7, etc. (jugador 2)
+          } else if (i % 6 === 1) { // Si estamos en alguna fila con indice 1, 4, 7, etc. (jugador 2)
             table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
           } else { // Si estamos en alguna fila con indice 2, 5, 8, etc. (jugador 3)
             table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
