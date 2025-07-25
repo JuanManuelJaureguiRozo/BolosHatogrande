@@ -199,6 +199,8 @@
               <li><a class="dropdown-item" href="../../torneos/torneo_invitacional/individual_femenino.html">Individual Femenino</a></li>
               <li><a class="dropdown-item" href="../../torneos/torneo_invitacional/parejas.html">Parejas</a></li>
               <li><a class="dropdown-item" href="../../torneos/torneo_invitacional/equipos.html">Equipos</a></li>
+              <li><a class="dropdown-item" href="../../torneos/torneo_invitacional/todo_evento_masculino.html">Todo Evento Masculino</a></li>
+              <li><a class="dropdown-item" href="../../torneos/torneo_invitacional/todo_evento_femenino.html">Todo Evento Femenino</a></li>
             </ul>
           </li>
           <!-- Menú desplegable 4 -->
@@ -231,7 +233,7 @@
   </footer>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQHEGXOEKGQILLDXwaaz5oRTxAC_5SRBd4foxebEQxtTY9aYMtBacBZd5BynLfIhtivX8wucAgeHWLM/pubhtml?gid=908468269&single=true";
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiHKvgJpfxx376CMR2gxC4dcVrqWiipuDWPXGipodWrLEKoLRBYSMSaRcPr4kwltg-qxvkuffa3jNC/pubhtml?gid=1769171130&single=true";
 
   async function fetchSheetAsTable(url) {
     const res = await fetch(url);
@@ -263,23 +265,6 @@
     }
 
     //-------------------------------------VISUALIZACIÓN----------------------------------//
-
-    // Revisar las líneas de cada jugador y almacenar en un array las 5 líneas
-    const lines = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(3, 8).map(cell => cell.innerText.trim());
-    });
-
-    console.log(lines);
-
-    // Verificar los elementos de lines y en la tabla resaltar en amarillo los que son mayores a 200
-    for (let i = 0; i < lines.length; i++) {
-      for (let j = 0; j < lines[i].length; j++) {
-        if (parseInt(lines[i][j]) >= 200) {
-          // Resaltar en amarillo los elementos mayores a 200
-          table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b";
-        }
-      }
-    }
 
     // Insertar tabla con formato
     document.getElementById("tabla-resultados").appendChild(table);
