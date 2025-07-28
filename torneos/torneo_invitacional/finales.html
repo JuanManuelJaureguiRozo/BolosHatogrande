@@ -240,8 +240,9 @@
   const zoomContainer = document.createElement("div");
   zoomContainer.style.transform = "scale(0.75)";
   zoomContainer.style.transformOrigin = "top left";
-  zoomContainer.style.width = "133.33%"; // Compensa el scale
-  zoomContainer.style.height = "600px";  // Ajusta según la hoja
+  zoomContainer.style.width = "133.33%";
+  zoomContainer.style.height = "900px";
+  zoomContainer.style.overflow = "hidden";
 
   // Crear iframe
   const iframe = document.createElement("iframe");
@@ -250,12 +251,23 @@
   iframe.height = "850";
   iframe.frameBorder = "0";
   iframe.style.border = "none";
+  iframe.id = "hoja-finales"; // Para poder identificarlo
 
   // Insertar iframe dentro del contenedor con zoom
   zoomContainer.appendChild(iframe);
 
   // Insertar en el div de resultados
   document.getElementById("tabla-resultados").appendChild(zoomContainer);
+
+  // --- 🔁 OPCIÓN 3: recargar automáticamente cada 5 minutos ---
+  setInterval(() => {
+    const iframe = document.getElementById("hoja-finales");
+    if (iframe) {
+      const currentSrc = iframe.src.split("?")[0];
+      const timestamp = new Date().getTime(); // Evita el caché
+      iframe.src = `${currentSrc}?gid=1244242968&single=true&widget=false&headers=false&t=${timestamp}`;
+    }
+  }, 3000); // 3 segundos
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
