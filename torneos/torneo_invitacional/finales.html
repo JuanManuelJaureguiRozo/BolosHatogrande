@@ -234,7 +234,10 @@
   </footer>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuLP8TsTXah3pHNKx7MaN9qU1VU5cZKkz863xE5-yoB6lAdQqRkVXQemkCL9rpOGcRQ7lkUuTmy6MX/pubhtml";
+  const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuLP8TsTXah3pHNKx7MaN9qU1VU5cZKkz863xE5-yoB6lAdQqRkVXQemkCL9rpOGcRQ7lkUuTmy6MX/pubhtml";
+
+  // Agregar parámetro anti-cache
+  const SHEET_URL = `${BASE_URL}?t=${Date.now()}`;
 
   // Crear un contenedor con zoom aplicado
   const zoomContainer = document.createElement("div");
