@@ -234,76 +234,20 @@
   </footer>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSiHKvgJpfxx376CMR2gxC4dcVrqWiipuDWPXGipodWrLEKoLRBYSMSaRcPr4kwltg-qxvkuffa3jNC/pubhtml?gid=860279698&single=true";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbyp7Cw3-MWoO6QB4sr1MGDs07XlpKi492POaViA7lk7Ei1gr0e0dRwpRSwAu0ETZOfRPA/exec?hoja=Parejas%20Ordenado";
 
   async function fetchSheetAsTable(url) {
     const res = await fetch(url);
     const htmlText = await res.text();
+
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, 'text/html');
-
     const table = doc.querySelector('table');
-    table.classList.add("table", "table-bordered", "table-striped", "bg-light", "text-dark", "w-100");
 
-    // Estilo para encabezados (primera y segunda fila)
-    for (let i = 0; i < 2; i++) {
-      if (table.rows[i]) {
-        for (let cell of table.rows[i].cells) {
-          cell.style.fontWeight = "bold";
-          cell.style.backgroundColor = "#004c3f";
-          cell.style.color = "white";
-          cell.style.whiteSpace = "nowrap";
-        }
-      }
-    }
-
-    // Eliminar la primera fila (si existe)
-    if (table.rows[0]) table.deleteRow(0);
-
-    // Eliminar la primera columna (si existe)
-    for (let i = 0; i < table.rows.length; i++) {
-      if (table.rows[i].cells[0]) table.rows[i].deleteCell(0);
-    }
-
-    //------------------------------LÓGICA LÍNEA SIN HCP----------------------------------//
-
-    // Revisar las líneas de cada jugador y almacenar en un array las 10 líneas
-    const lines = Array.from(table.rows).slice(1).map(row => {
-      return Array.from(row.cells).slice(2, 8).map(cell => cell.innerText.trim());
-    });
-
-    for (let i = 0; i < lines.length; i++) {
-      if (i % 2 === 0) {
-        lines[i].shift(); // Quitar el primer elemento de las filas 0, 2, 4, 6, etc.
-      } else {
-        lines[i].pop(); // Quitar el último elemento de las filas 1, 3, 5, 7, etc.
-      }
-    }
-    
-    // Verificar los elementos de lines y en la tabla resaltar en amarillo los que son mayores a 200
-    for (let i = 0; i < lines.length; i++) {
-      for (let j = 0; j < lines[i].length; j++) {
-        if (parseInt(lines[i][j]) >= 200) {
-          // Si estamos en la fila 0, 2, 4, 6
-          if (i % 2 === 0) {
-            table.rows[i + 1].cells[j + 3].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
-          } 
-          else { // Si estamos en la fila 1, 3, 5, 7
-            table.rows[i + 1].cells[j + 2].style.backgroundColor = "#ffeb3b"; // Resaltar en amarillo
-          }
-        }
-      }
-    }
-
-    //-------------------------------------VISUALIZACIÓN----------------------------------//
-
-    // Insertar tabla con formato
     document.getElementById("tabla-resultados").appendChild(table);
-
-    return table;
   }
 
-  const table = fetchSheetAsTable(SHEET_URL);
+  fetchSheetAsTable(SHEET_URL);
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
