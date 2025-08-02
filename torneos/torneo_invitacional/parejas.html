@@ -244,7 +244,7 @@
 </footer>
 
 <script>
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbxVrDqBq_j99Wp124KL4h8EVeL-mNFvT9R_x-OmnWk0v-_n2MbcpvN43pmlgqND60d_ig/exec?hoja=Parejas%20Ordenado";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwp-CZ-JijPTcUujOFyYg2AztmXbptP7UggIGq1_dn9VRJep_iq1czJefaGeVKApnMcxA/exec?hoja=Parejas%20Ordenado";
 
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
@@ -252,27 +252,179 @@
 
     try {
       const res = await fetch(url);
-      const htmlText = await res.text();
+      const json = await res.json();
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlText, 'text/html');
-      const table = doc.querySelector('table');
-
-      if (table) {
-        tabla.appendChild(table);
-        tabla.style.display = "block";
-      } else {
+      if (!json || !json.headers || !json.data) {
         loader.innerHTML = `<p class="text-danger mt-3">No se encontraron resultados para mostrar.</p>`;
         return;
       }
+
+      const table = document.createElement("table");
+      table.className = "table table-bordered table-striped";
+
+      const thead = document.createElement("thead");
+      const trHead = document.createElement("tr");
+
+      json.headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        trHead.appendChild(th);
+      });
+
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+        json.data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          for (let i = 0; i < json.headers.length; i++) {
+            const td = document.createElement("td");
+            td.textContent = row[i] ?? ""; // Usa string vacío si no hay valor
+            tr.appendChild(td);
+          }
+
+          tbody.appendChild(tr);
+        });
+
+      table.appendChild(tbody);
+
+      if (new URL(url).searchParams.get("hoja")?.toLowerCase().includes("pareja")) {
+        const rows = tbody.querySelectorAll("tr");
+
+        for (let i = 0; i < rows.length; i += 2) {
+          const firstRow = rows[i];
+          const secondRow = rows[i + 1];
+
+          if (!firstRow || !secondRow) continue;
+
+          const totalCols = firstRow.cells.length;
+          const secondLastIdx = totalCols - 2;
+          const lastIdx = totalCols - 1;
+
+          // Verificamos que haya par
+          if (!secondRow) continue;
+
+          // Verificamos que haya celdas suficientes
+          if (
+            firstRow.cells.length <= lastIdx || 
+            secondRow.cells.length <= lastIdx
+          ) continue;
+
+          const lastA = firstRow.cells[lastIdx];
+          const lastB = secondRow.cells[lastIdx];
+
+          // Nos aseguramos de que no sean celdas vacías o nulas
+          if (lastA?.textContent?.trim() !== "" && lastB?.textContent?.trim() !== "") {
+            lastA.rowSpan = 2;
+            lastA.style.textAlign = "center";
+            lastA.classList.add("align-middle");
+            lastB.remove();
+          }
+
+          // --- FUSIONAR PRIMERA COLUMNA ---
+          const firstCell = firstRow.cells[0];
+          const secondCell = secondRow.cells[0];
+
+          if (firstCell && secondCell) {
+            firstCell.rowSpan = 2;
+            firstCell.style.textAlign = "center";
+            firstCell.classList.add("align-middle");
+            secondCell.remove();
+          }
+
+          // --- FUSIONAR PENÚLTIMA COLUMNA ---
+          const secondLastA = firstRow.cells[secondLastIdx];
+          const secondLastB = secondRow.cells[secondLastIdx];
+          console.log("secondLastA", secondLastA, "secondLastB", secondLastB);
+
+          if (secondLastA && secondLastB) {
+            secondLastA.rowSpan = 2;
+            secondLastA.style.textAlign = "center";
+            secondLastA.classList.add("align-middle");
+            secondLastB.remove();
+          }
+
+          // --- FUSIONAR ÚLTIMA COLUMNA ---
+
+          if (lastA && lastB) {
+            lastA.rowSpan = 2;
+            lastA.style.textAlign = "center";
+            lastA.classList.add("align-middle");
+            lastB.remove();
+          }
+        }
+      }
+
+      resaltarCeldas(table, url);
+
+      tabla.appendChild(table);
+      tabla.style.display = "block";
+
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
       loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
       return;
     }
 
-    // Eliminar por completo el loader del DOM
     loader.remove();
+  }
+
+  function resaltarCeldas(table, url) {
+    const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase() || "";
+    if (hoja.includes("todo evento")) return;
+
+    const rows = table.querySelectorAll("tbody tr");
+
+    for (let i = 0; i < rows.length; i++) {
+      const cells = rows[i].children;
+
+      if (hoja.includes("individual")) {
+        for (let j = 3; j <= 7; j++) {
+          const cell = cells[j];
+          const value = parseInt(cell?.textContent.trim());
+          if (!isNaN(value) && value >= 200) {
+            cell.style.backgroundColor = "#ffeb3b";
+          }
+        }
+      }
+
+      if (hoja.includes("pareja")) {
+        for (let j = 3; j <= 7; j++) {
+          const cell = cells[j];
+          if (!cell) continue;
+          const value = parseInt(cell.textContent.trim());
+          if (!isNaN(value) && value >= 200) {
+            // Asegúrate de que L1 también pueda resaltarse
+            if ((i % 2 === 0 && j !== 3) || (i % 2 === 1 && j !== 7) || j === 3) {
+              cell.style.backgroundColor = "#ffeb3b";
+            }
+          }
+        }
+      }
+
+      if (hoja.includes("equipos")) {
+        for (let j = 3; j <= 7; j++) {
+          const cell = cells[j];
+          if (!cell) continue;
+          const value = parseInt(cell.textContent.trim());
+          if (!isNaN(value) && value >= 200) {
+            // Asegúrate de que L1 también pueda resaltarse
+            if ((i % 6 !== 5 && j !== 3) || (i % 6 !== 0 && j !== 7) || j === 3) {
+              cell.style.backgroundColor = "#ffeb3b";
+            }
+          }
+        }
+      }
+    }
+
+    // Header
+    const headers = table.querySelectorAll("thead th");
+    headers.forEach(th => {
+      th.style.backgroundColor = "#004c3f";
+      th.style.color = "white";
+    });
   }
 
   fetchSheetAsTable(SHEET_URL);
