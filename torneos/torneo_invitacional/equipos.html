@@ -390,16 +390,14 @@
         }
       }
 
-      if (hoja.includes("equipos")) {
-        for (let j = 3; j <= 7; j++) {
+      if (hoja.includes("equipo")) {
+        for (let j = 2; j <= 7; j++) {
           const cell = cells[j];
+          if (j === 7 && i % 6 !== 0) continue;
           if (!cell) continue;
           const value = parseInt(cell.textContent.trim());
           if (!isNaN(value) && value >= 200) {
-            // Asegúrate de que L1 también pueda resaltarse
-            if ((i % 6 !== 5 && j !== 3) || (i % 6 !== 0 && j !== 7) || j === 3) {
-              cell.style.backgroundColor = "#ffeb3b";
-            }
+            cell.style.backgroundColor = "#ffeb3b";
           }
         }
       }
