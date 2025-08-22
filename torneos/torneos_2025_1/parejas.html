@@ -332,7 +332,6 @@
           // --- FUSIONAR PENÚLTIMA COLUMNA ---
           const secondLastA = firstRow.cells[secondLastIdx];
           const secondLastB = secondRow.cells[secondLastIdx];
-          console.log("secondLastA", secondLastA, "secondLastB", secondLastB);
 
           if (secondLastA && secondLastB) {
             secondLastA.rowSpan = 2;
@@ -386,28 +385,41 @@
       }
 
       if (hoja.includes("pareja")) {
-        for (let j = 3; j <= 12; j++) {
+        for (let j = 2; j <= 12; j++) {
           const cell = cells[j];
           if (!cell) continue;
           const value = parseInt(cell.textContent.trim());
           if (!isNaN(value) && value >= 200) {
-            // Asegúrate de que L1 también pueda resaltarse
-            if ((i % 2 === 0 && j !== 3) || (i % 2 === 1 && j !== 12) || j === 3) {
+            if (i % 2 === 0) {
               cell.style.backgroundColor = "#ffeb3b";
+            }
+            if (i % 2 === 1) {
+              if (j != 12) {
+                cell.style.backgroundColor = "#ffeb3b";
+              }
             }
           }
         }
       }
 
-      if (hoja.includes("equipos")) {
-        for (let j = 3; j <= 7; j++) {
+      if (hoja.includes("ternas")) {
+        for (let j = 2; j <= 12; j++) {
           const cell = cells[j];
           if (!cell) continue;
           const value = parseInt(cell.textContent.trim());
           if (!isNaN(value) && value >= 200) {
-            // Asegúrate de que L1 también pueda resaltarse
-            if ((i % 6 !== 5 && j !== 3) || (i % 6 !== 0 && j !== 7) || j === 3) {
+            if (i % 3 === 0) {
               cell.style.backgroundColor = "#ffeb3b";
+            }
+            if (i % 3 === 1) {
+              if (j != 12) {
+                cell.style.backgroundColor = "#ffeb3b";
+              }
+            }
+            else {
+              if (j != 12) {
+                cell.style.backgroundColor = "#ffeb3b";
+              }
             }
           }
         }

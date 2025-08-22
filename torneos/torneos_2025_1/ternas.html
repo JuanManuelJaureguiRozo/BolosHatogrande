@@ -286,53 +286,60 @@
       const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase();
 
       if (hoja.includes("ternas")) {
-        const rows = tbody.querySelectorAll("tr");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
 
         for (let i = 0; i < rows.length; i += 3) {
           const row1 = rows[i];
           const row2 = rows[i + 1];
           const row3 = rows[i + 2];
-
           if (!row1 || !row2 || !row3) continue;
 
-          const totalCols = row1.cells.length;
+          // --- SNAPSHOT: evitar HTMLCollections "vivas" ---
+          const cells1 = Array.from(row1.querySelectorAll("td,th"));
+          const cells2 = Array.from(row2.querySelectorAll("td,th"));
+          const cells3 = Array.from(row3.querySelectorAll("td,th"));
+
+          const totalCols = cells1.length;
           const penultima = totalCols - 2;
           const ultima = totalCols - 1;
 
+          // helper: merge en un índice dado usando los snapshots
+          const mergeAt = (idx) => {
+            const a = cells1[idx];
+            const b = cells2[idx];
+            const c = cells3[idx];
+            if (a && b && c) {
+              a.rowSpan = 3;
+              a.classList.add("align-middle");
+              a.style.textAlign = "center";
+              if (b.parentNode) b.parentNode.removeChild(b);
+              if (c.parentNode) c.parentNode.removeChild(c);
+            } else {
+              // diagnóstico: si falla, imprime para depurar
+              console.warn(`No se pudo fusionar índice ${idx} en ternas (fila ${i}).`,
+                { idx, row1Len: cells1.length, row2Len: cells2.length, row3Len: cells3.length },
+                { aText: a?.textContent?.trim(), bText: b?.textContent?.trim(), cText: c?.textContent?.trim() }
+              );
+            }
+          };
+
+          // 1) fusionar última, 2) penúltima (derecha -> izquierda)
+          mergeAt(ultima);
+          mergeAt(penultima);
+
           // Fusionar columna de nombres (columna 0)
-          const cellA = row1.cells[0];
-          const cellB = row2.cells[0];
-          const cellC = row3.cells[0];
-          if (cellA && cellB && cellC) {
-            cellA.rowSpan = 3;
-            cellA.classList.add("align-middle");
-            cellA.style.textAlign = "center";
-            cellB.remove();
-            cellC.remove();
-          }
-
-          // Fusionar penúltima columna
-          const penA = row1.cells[penultima];
-          const penB = row2.cells[penultima];
-          const penC = row3.cells[penultima];
-          if (penA && penB && penC) {
-            penA.rowSpan = 3;
-            penA.classList.add("align-middle");
-            penA.style.textAlign = "center";
-            penB.remove();
-            penC.remove();
-          }
-
-          // Fusionar última columna
-          const lastA = row1.cells[ultima];
-          const lastB = row2.cells[ultima];
-          const lastC = row3.cells[ultima];
-          if (lastA && lastB && lastC) {
-            lastA.rowSpan = 3;
-            lastA.classList.add("align-middle");
-            lastA.style.textAlign = "center";
-            lastB.remove();
-            lastC.remove();
+          const nameA = cells1[0];
+          const nameB = cells2[0];
+          const nameC = cells3[0];
+          if (nameA && nameB && nameC) {
+            nameA.rowSpan = 3;
+            nameA.classList.add("align-middle");
+            nameA.style.textAlign = "center";
+            if (nameB.parentNode) nameB.parentNode.removeChild(nameB);
+            if (nameC.parentNode) nameC.parentNode.removeChild(nameC);
+          } else {
+            console.warn("No se pudo fusionar la columna de nombres en ternas (pos 0).",
+              { row1Len: cells1.length, row2Len: cells2.length, row3Len: cells3.length });
           }
         }
       }
@@ -370,40 +377,41 @@
       }
 
       if (hoja.includes("pareja")) {
-        for (let j = 3; j <= 12; j++) {
+        for (let j = 2; j <= 12; j++) {
           const cell = cells[j];
           if (!cell) continue;
           const value = parseInt(cell.textContent.trim());
           if (!isNaN(value) && value >= 200) {
-            if ((i % 2 === 0 && j !== 3) || (i % 2 === 1 && j !== 12) || j === 3) {
+            if (i % 2 === 0) {
               cell.style.backgroundColor = "#ffeb3b";
+            }
+            if (i % 2 === 1) {
+              if (j != 12) {
+                cell.style.backgroundColor = "#ffeb3b";
+              }
             }
           }
         }
       }
 
       if (hoja.includes("ternas")) {
-        for (let j = 3; j <= 11; j++) {
+        for (let j = 2; j <= 12; j++) {
           const cell = cells[j];
           if (!cell) continue;
           const value = parseInt(cell.textContent.trim());
           if (!isNaN(value) && value >= 200) {
-            if ((i % 3 !== 2 && j !== 3) || (i % 3 !== 0 && j !== 12) || j === 3) {
+            if (i % 3 === 0) {
               cell.style.backgroundColor = "#ffeb3b";
             }
-          }
-        }
-      }
-
-
-      if (hoja.includes("equipos")) {
-        for (let j = 3; j <= 7; j++) {
-          const cell = cells[j];
-          if (!cell) continue;
-          const value = parseInt(cell.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            if ((i % 6 !== 5 && j !== 3) || (i % 6 !== 0 && j !== 7) || j === 3) {
-              cell.style.backgroundColor = "#ffeb3b";
+            if (i % 3 === 1) {
+              if (j != 12) {
+                cell.style.backgroundColor = "#ffeb3b";
+              }
+            }
+            else {
+              if (j != 12) {
+                cell.style.backgroundColor = "#ffeb3b";
+              }
             }
           }
         }
