@@ -229,6 +229,7 @@
 
   <!-- Aquí va la tabla -->
   <div class="table-responsive mt-4" id="tabla-resultados" style="display:none;"></div>
+  <div id="mejor-linea" class="mt-4"></div>
 </div>
 
 <!-- FOOTER -->
@@ -244,6 +245,7 @@
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
     const tabla = document.getElementById("tabla-resultados");
+    const mejorLinea = document.getElementById("mejor-linea");
 
     try {
       const res = await fetch(url);
@@ -283,10 +285,28 @@
 
       table.appendChild(tbody);
 
-      resaltarCeldas(table, url);
+      const result = resaltarCeldas(table, url);
 
       tabla.appendChild(table);
       tabla.style.display = "block";
+
+      // Mostrar mejor línea
+      if (result && result.maxScore != null) {
+        const { maxScore, maxPlayer } = result;
+        const card = document.createElement("div");
+        card.className = "card mt-3 shadow-sm border-success mx-auto";
+        card.style.maxWidth = "400px";
+        card.innerHTML = `
+          <div class="card-body text-center">
+            <h5 class="card-title text-success">Línea más alta</h5>
+            <p class="card-text mb-1">
+              <strong>${maxPlayer}</strong> hizo la línea más alta
+            </p>
+            <h2 class="text-dark">${maxScore}</h2>
+          </div>
+        `;
+        mejorLinea.appendChild(card);
+      }
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
@@ -381,6 +401,24 @@
       th.style.backgroundColor = "#004c3f";
       th.style.color = "white";
     });
+
+    // Buscar la mejor línea
+    let maxScore = -Infinity;
+    let maxPlayer = "(desconocido)";
+
+    for (let i = 0; i < rows.length; i++) {
+      const cells = rows[i].children;
+      // recorre todas las columnas de puntuación disponibles
+      for (let j = 2; j < 11; j++) {
+        const v = parseInt(cells[j]?.textContent.trim(), 10);
+        if (!Number.isNaN(v) && v > maxScore) {
+          maxScore = v;
+          maxPlayer = cells[1]?.textContent.trim() || "(desconocido)";
+        }
+      }
+    }
+
+    return Number.isFinite(maxScore) ? { maxScore, maxPlayer } : null;
   }
 
   fetchSheetAsTable(SHEET_URL);
