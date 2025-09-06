@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resultados Ternas Primer Semestre</title>
+  <title>Resultados Selectivo Masculino Interclubes Hatogrande</title>
   <link rel="icon" href="../../img/faviconHG.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       background-color: #f5f5f5;
     }
-  
+
     .contenido {
       margin: 2rem auto;
       max-width: 100%;
@@ -80,7 +80,7 @@
     }
   
     .navbar-custom .dropdown-item:hover {
-      background-color: #91a7a3;
+      background-color: #f0f0f0;
       color: #000;
     }
   
@@ -104,7 +104,6 @@
       display: block;
     }
   
-    /* Menú lateral en móviles + reordenar logo */
     @media (max-width: 992px) {
       .navbar-collapse {
         position: fixed;
@@ -215,12 +214,13 @@
           </li>
         </ul>
       </div>
+  
     </div>
   </nav>
-<div id="menu-overlay" class="menu-overlay"></div>  
+<div id="menu-overlay" class="menu-overlay"></div> 
 
 <div class="container contenido text-center">
-  <h1>Resultados Torneo - Ternas Primer Semestre</h1>
+  <h1>Resultados Selectivo Masculino Interclubes Hatogrande</h1>
 
   <!-- Indicador de carga -->
   <div id="loader" class="mt-4 d-flex justify-content-center align-items-center flex-column">
@@ -232,6 +232,7 @@
 
   <!-- Aquí va la tabla -->
   <div class="table-responsive mt-4" id="tabla-resultados" style="display:none;"></div>
+  <div id="mejor-linea" class="mt-4"></div>
 </div>
 
 <!-- FOOTER -->
@@ -242,11 +243,12 @@
 </footer>
 
 <script>
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbyn8q1-pyU6_cQrS8j2tfvPPd-VmBbXAUs1IfAA7iLJWYqRUUbU3dgtS6k-OEL4cnQHtg/exec?hoja=Ternas%20Ordenadas";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-6B43uxQGbEfbZrl4nwJ1HSfAm7BSCupKTKxmaYv79j7Fh9bVgoIGx1auz2LCnU65/exec?hoja=Selectivo%20Masculino%20Ordenado";
 
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
     const tabla = document.getElementById("tabla-resultados");
+    const mejorLinea = document.getElementById("mejor-linea");
 
     try {
       const res = await fetch(url);
@@ -276,81 +278,21 @@
 
       json.data.forEach(row => {
         const tr = document.createElement("tr");
-        for (let i = 0; i < json.headers.length; i++) {
+        row.forEach(cell => {
           const td = document.createElement("td");
-          td.textContent = row[i] ?? "";
+          td.textContent = cell;
           tr.appendChild(td);
-        }
+        });
         tbody.appendChild(tr);
       });
 
       table.appendChild(tbody);
 
-      const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase();
-
-      if (hoja.includes("ternas")) {
-        const rows = Array.from(tbody.querySelectorAll("tr"));
-
-        for (let i = 0; i < rows.length; i += 3) {
-          const row1 = rows[i];
-          const row2 = rows[i + 1];
-          const row3 = rows[i + 2];
-          if (!row1 || !row2 || !row3) continue;
-
-          // --- SNAPSHOT: evitar HTMLCollections "vivas" ---
-          const cells1 = Array.from(row1.querySelectorAll("td,th"));
-          const cells2 = Array.from(row2.querySelectorAll("td,th"));
-          const cells3 = Array.from(row3.querySelectorAll("td,th"));
-
-          const totalCols = cells1.length;
-          const penultima = totalCols - 2;
-          const ultima = totalCols - 1;
-
-          // helper: merge en un índice dado usando los snapshots
-          const mergeAt = (idx) => {
-            const a = cells1[idx];
-            const b = cells2[idx];
-            const c = cells3[idx];
-            if (a && b && c) {
-              a.rowSpan = 3;
-              a.classList.add("align-middle");
-              a.style.textAlign = "center";
-              if (b.parentNode) b.parentNode.removeChild(b);
-              if (c.parentNode) c.parentNode.removeChild(c);
-            } else {
-              // diagnóstico: si falla, imprime para depurar
-              console.warn(`No se pudo fusionar índice ${idx} en ternas (fila ${i}).`,
-                { idx, row1Len: cells1.length, row2Len: cells2.length, row3Len: cells3.length },
-                { aText: a?.textContent?.trim(), bText: b?.textContent?.trim(), cText: c?.textContent?.trim() }
-              );
-            }
-          };
-
-          // 1) fusionar última, 2) penúltima (derecha -> izquierda)
-          mergeAt(ultima);
-          mergeAt(penultima);
-
-          // Fusionar columna de nombres (columna 0)
-          const nameA = cells1[0];
-          const nameB = cells2[0];
-          const nameC = cells3[0];
-          if (nameA && nameB && nameC) {
-            nameA.rowSpan = 3;
-            nameA.classList.add("align-middle");
-            nameA.style.textAlign = "center";
-            if (nameB.parentNode) nameB.parentNode.removeChild(nameB);
-            if (nameC.parentNode) nameC.parentNode.removeChild(nameC);
-          } else {
-            console.warn("No se pudo fusionar la columna de nombres en ternas (pos 0).",
-              { row1Len: cells1.length, row2Len: cells2.length, row3Len: cells3.length });
-          }
-        }
-      }
-
-      resaltarCeldas(table, url);
+      resaltarCeldas(table, SHEET_URL);
 
       tabla.appendChild(table);
       tabla.style.display = "block";
+
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
       loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
@@ -360,73 +302,39 @@
     loader.remove();
   }
 
-  function resaltarCeldas(table, url) {
+    function resaltarCeldas(table, url) {
     const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase() || "";
     if (hoja.includes("todo evento")) return;
 
+    // 👉 Encabezado
+    const headerRow = table.querySelector("thead tr");
+    if (headerRow) {
+      headerRow.querySelectorAll("th").forEach(th => {
+        th.style.backgroundColor = "#004c3f";
+        th.style.color = "white";
+        th.style.fontWeight = "bold";
+      });
+    }
+
+    // 👉 Filas del cuerpo
     const rows = table.querySelectorAll("tbody tr");
 
     for (let i = 0; i < rows.length; i++) {
-      const cells = rows[i].children;
-
-      if (hoja.includes("individual")) {
-        for (let j = 3; j <= 7; j++) {
-          const cell = cells[j];
-          const value = parseInt(cell?.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            cell.style.backgroundColor = "#ffeb3b";
-          }
+      if (hoja.includes("selectivo")) {
+        if (i < 9) {
+          rows[i].querySelectorAll("td").forEach(td => {
+            td.style.backgroundColor = "#d4edda"; // verde pastel
+            td.style.color = "#155724";           // texto verde más oscuro
+            td.style.fontWeight = "bold";
+          });
         }
-      }
 
-      if (hoja.includes("pareja")) {
-        for (let j = 2; j <= 12; j++) {
-          const cell = cells[j];
-          if (!cell) continue;
-          const value = parseInt(cell.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            if (i % 2 === 0) {
-              cell.style.backgroundColor = "#ffeb3b";
-            }
-            if (i % 2 === 1) {
-              if (j != 12) {
-                cell.style.backgroundColor = "#ffeb3b";
-              }
-            }
-          }
-        }
-      }
-
-      if (hoja.includes("ternas")) {
-        for (let j = 2; j <= 12; j++) {
-          const cell = cells[j];
-          if (!cell) continue;
-          const value = parseInt(cell.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            if (i % 3 === 0) {
-              cell.style.backgroundColor = "#ffeb3b";
-            }
-            if (i % 3 === 1) {
-              if (j != 12) {
-                cell.style.backgroundColor = "#ffeb3b";
-              }
-            }
-            else {
-              if (j != 12) {
-                cell.style.backgroundColor = "#ffeb3b";
-              }
-            }
-          }
+        // 👉 Borde inferior al noveno jugador (i === 8)
+        if (i === 8) {
+          rows[i].style.borderBottom = "3px solid #004c3f";
         }
       }
     }
-
-    // Header estilizado
-    const headers = table.querySelectorAll("thead th");
-    headers.forEach(th => {
-      th.style.backgroundColor = "#004c3f";
-      th.style.color = "white";
-    });
   }
 
   fetchSheetAsTable(SHEET_URL);

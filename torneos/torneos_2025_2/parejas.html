@@ -199,6 +199,8 @@
               <li><a class="dropdown-item" href="../../torneos/torneos_2025_2/individual_masculino.html">Individual Masculino</a></li>
               <li><a class="dropdown-item" href="../../torneos/torneos_2025_2/individual_femenino.html">Individual Femenino</a></li>
               <li><a class="dropdown-item" href="../../torneos/torneos_2025_2/parejas.html">Parejas</a></li>
+              <li><a class="dropdown-item" href="../../torneos/selectivos/selectivo_femenino.html">Selectivo Femenino</a></li>
+              <li><a class="dropdown-item" href="../../torneos/selectivos/selectivo_masculino.html">Selectivo Masculino</a></li>
             </ul>
           </li>
           <!-- Menú desplegable 4 -->
@@ -359,8 +361,46 @@
       tabla.appendChild(table);
       tabla.style.display = "block";
 
-      if (result) {
-        console.log("Mejor pareja:", result.maxPair);
+      // Mostrar mejor línea sin HCP (para parejas)
+      if (result && result.sinHCP.puntaje != 0) {
+
+        const card = document.createElement("div");
+        card.className = "card mt-3 shadow-sm border-success mx-auto";
+        card.style.maxWidth = "400px";
+
+        card.innerHTML = `
+          <div class="card-body text-center">
+            <h5 class="card-title text-success">Línea más alta sin HCP</h5>
+            <p class="card-text mb-1">
+              <strong>${result.sinHCP.jugadores.join(" y ")}</strong><br>
+              hicieron la línea más alta sin HCP en la línea ${result.sinHCP.linea}
+            </p>
+            <h2 class="text-dark">${result.sinHCP.puntaje}</h2>
+          </div>
+        `;
+
+        mejorPareja.appendChild(card);
+      }
+
+      // Mostrar mejor línea con HCP (para parejas)
+      if (result && result.conHCP.puntaje != 0) {
+
+        const card = document.createElement("div");
+        card.className = "card mt-3 shadow-sm border-success mx-auto";
+        card.style.maxWidth = "400px";
+
+        card.innerHTML = `
+          <div class="card-body text-center">
+            <h5 class="card-title text-success">Línea más alta con HCP</h5>
+            <p class="card-text mb-1">
+              <strong>${result.conHCP.jugadores.join(" y ")}</strong><br>
+              hicieron la línea más alta con HCP en la línea ${result.conHCP.linea}
+            </p>
+            <h2 class="text-dark">${result.conHCP.puntaje}</h2>
+          </div>
+        `;
+
+        mejorPareja.appendChild(card);
       }
 
     } catch (err) {
@@ -377,6 +417,7 @@
     if (hoja.includes("todo evento")) return;
 
     const rows = table.querySelectorAll("tbody tr");
+    const rows1 = Array.from(table.querySelectorAll("tbody tr"));
 
     for (let i = 0; i < rows.length; i++) {
       const cells = rows[i].children;
@@ -440,45 +481,151 @@
       th.style.color = "white";
     });
 
-    // Buscar la mejor pareja por la suma más alta en una sola línea
-    let maxPair = { jugadores: [], mejorLinea: -Infinity, lineaIndex: -1 };
+    // Mayores líneas
+    if (hoja.includes("pareja")) {
 
-    for (let i = 0; i < rows.length; i += 2) {
-      const row1 = rows[i]?.children;
-      const row2 = rows[i + 1]?.children;
-      if (!row1 || !row2) continue;
+      // ------------------------- Lógica Línea sin HCP ------------------------------
 
-      const jugador1 = row1[1]?.textContent.trim() || "(desconocido)";
-      const jugador2 = row2[0]?.textContent.trim() || "(desconocido)";
+      // 1) Construir arreglo con las 10 líneas de cada jugador
+      const lines = rows1.map(row => {
+        return Array.from(row.cells).slice(2, 13).map(cell => cell.innerText.trim());
+      });
 
-      // si la fila es impar (0-based, o sea i es par => fila impar real),
-      // se omite la col 12
-      const maxCol = (i % 2 === 0) ? 11 : 12; 
-
-      let mejorLinea = -Infinity;
-      let lineaIndex = -1;
-
-      for (let j = 2; j < maxCol; j++) {
-        const v1 = parseInt(row1[j]?.textContent.trim(), 10);
-        const v2 = parseInt(row2[j]?.textContent.trim(), 10);
-        const sumaLinea = (Number.isNaN(v1) ? 0 : v1) + (Number.isNaN(v2) ? 0 : v2);
-
-        if (sumaLinea > mejorLinea) {
-          mejorLinea = sumaLinea;
-          lineaIndex = j - 1; // para que quede L1…L10
+      // Ajustar para que los pares de filas queden alineados
+      for (let i = 0; i < lines.length; i++) {
+        if (i % 2 === 0) {
+          lines[i].shift(); // quitar primera celda de los pares
+        } else {
+          lines[i].pop();   // quitar última celda de los impares
         }
       }
 
-      if (Number.isFinite(mejorLinea)) {
-        maxPair = {
-          jugadores: [jugador1, jugador2],
-          mejorLinea,
-          lineaIndex
+      // 2) Calcular la línea más alta de todas las parejas
+      let lineaSinHCP = 0;
+      let bestGroupIndex = -1;
+      let maxIndex = -1;
+
+      for (let i = 0; i < lines.length; i += 2) {
+        const group = lines.slice(i, i + 2);
+        const positionalSums = Array(10).fill(0);
+
+        for (let j = 0; j < group.length; j++) {
+          for (let k = 0; k < group[j].length; k++) {
+            positionalSums[k] += parseInt(group[j][k], 10) || 0;
+          }
+        }
+
+        const groupSum = Math.max(...positionalSums);
+        if (groupSum > lineaSinHCP) {
+          lineaSinHCP = groupSum;
+          bestGroupIndex = i;
+          maxIndex = positionalSums.indexOf(groupSum) + 1; // Línea ganadora (L1..L10)
+        }
+      }
+
+      // 3) Obtener los nombres de los jugadores de esa pareja
+      const names_lines = rows1.map(row => {
+        return Array.from(row.cells).slice(0, 8).map(cell => cell.innerText.trim());
+      });
+
+      for (let i = 0; i < names_lines.length; i++) {
+        if (i % 2 === 0) {
+          names_lines[i].shift();
+        } else {
+          names_lines[i].pop();
+        }
+      }
+
+      const nombresParejaMayorLinea = names_lines.slice(bestGroupIndex, bestGroupIndex + 2)
+        .map(arr => arr[0]); // tomar solo nombre del jugador
+
+      // ------------------ Lógica Línea con HCP ---------------------------------------
+
+      const lines1 = rows1.map(row => {
+        return Array.from(row.cells).slice(1, 13).map(cell => cell.innerText.trim());
+      });
+
+        for (let i = 0; i < lines1.length; i++) {
+          if (i % 2 === 0) {
+            lines1[i].shift();
+          } else {
+            lines1[i].pop();
+          }
+        }
+
+        let lineaConHCP = 0;
+        let bestGroupIndex1 = -1;
+        let maxIndex1 = -1;
+
+        for (let i = 0; i < lines1.length; i += 2) {
+          const group1 = lines1.slice(i, i + 2);
+
+          const positionalSums1 = new Array(11).fill(0);
+          for (let j = 0; j < group1.length; j++) {
+            for (let k = 0; k < group1[j].length; k++) {
+              positionalSums1[k] += parseInt(group1[j][k], 10) || 0;
+            }
+          }
+
+          // HCP total está en posición 0
+          const hcpTotal = positionalSums1[0];
+
+          // Sumar HCP a las demás posiciones
+          for (let k = 1; k < positionalSums1.length; k++) {
+            positionalSums1[k] += hcpTotal;
+          }
+
+          const groupSum1 = Math.max(...positionalSums1);
+          if (groupSum1 > lineaConHCP) {
+            if (maxIndex1 === 0) {
+              lineaConHCP = 0;
+              bestGroupIndex1 = -1;
+              maxIndex1 = 0;
+            } else {
+              lineaConHCP = groupSum1;
+              bestGroupIndex1 = i;
+              maxIndex1 = positionalSums1.indexOf(groupSum1);
+            }
+          }
+        }
+
+        const bestGroup1 = lines1.slice(bestGroupIndex1, bestGroupIndex1 + 2);
+        const names_lines1 = Array.from(table.rows).slice(1).map(row => {
+          return Array.from(row.cells).slice(0, 8).map(cell => cell.innerText.trim());
+        });
+
+        for (let i = 0; i < names_lines1.length; i++) {
+          if (i % 2 === 0) {
+            names_lines1[i].shift();
+          } else {
+            names_lines1[i].pop();
+          }
+        }
+
+        const bestGroupNames1 = bestGroup1.map((_, index) => {
+          return names_lines1[bestGroupIndex1 + index].slice(0, 8).join(", ");
+        });
+
+        const nombresParejaMayorLinea1 = bestGroupNames1.map(name => name.split(",")[0]);
+
+        // -------------------------
+        // 3. Retornar resultados
+        // -------------------------
+        return {
+          sinHCP: {
+            linea: `L${maxIndex}`,
+            puntaje: lineaSinHCP,
+            jugadores: nombresParejaMayorLinea,
+          },
+          conHCP: {
+            linea: `L${maxIndex1}`,
+            puntaje: lineaConHCP,
+            jugadores: nombresParejaMayorLinea1,
+          }
         };
       }
-    }
 
-    return Number.isFinite(maxPair.mejorLinea) ? { maxPair } : null;
+    return null;
   }
 
   fetchSheetAsTable(SHEET_URL);
