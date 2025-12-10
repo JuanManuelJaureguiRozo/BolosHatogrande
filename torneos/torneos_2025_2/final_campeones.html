@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cuartos de Final</title>
+  <title>Final</title>
   <link rel="icon" href="../../img/faviconHG.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -230,7 +230,7 @@
 <div id="menu-overlay" class="menu-overlay"></div> 
 
 <div class="container contenido text-center">
-  <h1>Resultados Cuartos de Final</h1>
+  <h1>Resultados Final</h1>
 
   <!-- Indicador de carga -->
   <div id="loader" class="mt-4 d-flex justify-content-center align-items-center flex-column">
@@ -253,7 +253,7 @@
 </footer>
 
 <script>
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwBhh0FIEtGTJmY62KqIeSEiRPMcZTY7jt0Z8XPSqlmofuy0ahXbTJmcDhZzOWgUMxv/exec?hoja=CUARTOSX";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwBhh0FIEtGTJmY62KqIeSEiRPMcZTY7jt0Z8XPSqlmofuy0ahXbTJmcDhZzOWgUMxv/exec?hoja=FINALX";
 
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
@@ -318,65 +318,82 @@
 
     const rows = table.querySelectorAll("tbody tr");
 
-    if (hoja.toLowerCase().includes("cuartos")) {
+    if (hoja.toLowerCase().includes("final")) {
 
       const pares = [
-        [1, 2], [4, 5], [7, 8], [10, 11]
+        [1, 2], [4, 5]
       ];
+
+      // Columnas de los juegos → L1, L2, L3
+      const juegos = [2, 3, 4];
 
       pares.forEach(([filaA, filaB]) => {
 
-        const rowA = rows[filaA];
-        const rowB = rows[filaB];
+        // 🟣 Leer HCP de ambos
+        const hcpA = Number(rows[filaA]?.children[1].textContent.trim());
+        const hcpB = Number(rows[filaB]?.children[1].textContent.trim());
 
-        const cellA = rowA?.children[7];
-        const cellB = rowB?.children[7];
+        juegos.forEach(col => {
 
-        if (!cellA || !cellB) return;
+          const cellA = rows[filaA]?.children[col];
+          const cellB = rows[filaB]?.children[col];
 
-        const rawA = cellA.textContent.trim();
-        const rawB = cellB.textContent.trim();
+          if (!cellA || !cellB) return;
 
-        // 🛑 Si ambas están vacías → NO resaltar
-        if (rawA === "" && rawB === "") return;
+          const rawA = cellA.textContent.trim();
+          const rawB = cellB.textContent.trim();
 
-        // 🛑 Si solo una está vacía → NO resaltar
-        if (rawA === "" || rawB === "") return;
+          if (rawA === "" || rawB === "") return;
 
-        const valA = Number(rawA.replace(/[^0-9.-]/g, ""));
-        const valB = Number(rawB.replace(/[^0-9.-]/g, ""));
+          const valA = Number(rawA.replace(/[^0-9.-]/g, ""));
+          const valB = Number(rawB.replace(/[^0-9.-]/g, ""));
 
-        // 🛑 Si alguno no es número → NO resaltar
-        if (isNaN(valA) || isNaN(valB)) return;
+          if (isNaN(valA) || isNaN(valB)) return;
 
-        // 🔄 Reset estilos previos
-        [cellA, cellB].forEach(cell => {
-          cell.style.backgroundColor = "";
-          cell.style.color = "";
-          cell.style.fontWeight = "";
+          // 🔄 Reset
+          [cellA, cellB].forEach(cell => {
+            cell.style.backgroundColor = "";
+            cell.style.color = "";
+            cell.style.fontWeight = "";
+          });
+
+          let ganador;
+
+          if (valA > valB) {
+            ganador = cellA;
+          } else if (valB > valA) {
+            ganador = cellB;
+          } else {
+            // 🤝 Empate → gana el que tenga menor HCP
+            ganador = hcpA < hcpB ? cellA : cellB;
+          }
+
+          ganador.style.backgroundColor = "#ffd9b3";
+          ganador.style.color = "black";
+          ganador.style.fontWeight = "bold";
+
         });
-
-        // ⭐ Determinar ganador SOLO cuando hay números válidos
-        if (valA === valB) return; // 🛑 Empate → NO resaltar
-
-        const ganadorCell = valA > valB ? cellA : cellB;
-
-        ganadorCell.style.backgroundColor = "#ffd9b3";
-        ganadorCell.style.color = "black";
-        ganadorCell.style.fontWeight = "bold";
-
       });
+
+      // ⭐ Resalta columna 5 cuando el valor es "2"
+      for (let i = 0; i < rows.length; i++) {
+        const cell = rows[i].children[5];
+        if (!cell) continue;
+
+        if (cell.textContent.trim() === "2") {
+          cell.style.backgroundColor = "#b3ffd9";
+          cell.style.color = "black";
+          cell.style.fontWeight = "bold";
+        }
+      }
     }
 
     for (let i = 0; i < rows.length; i++) {
       const cells = rows[i].children;
 
-      if (hoja.includes("cuartos")) {
+      if (hoja.includes("final")) {
         const categoryColors = {
-          "ENFRENTAMIENTO #C1": "#cce5ff",
-          "ENFRENTAMIENTO #C2": "#d4edda",
-          "ENFRENTAMIENTO #C3": "#fff3cd",
-          "ENFRENTAMIENTO #C4": "#f8d7da",
+          "ENFRENTAMIENTO #F1": "#cce5ff"
         };
 
         const categoryCell = cells[0];

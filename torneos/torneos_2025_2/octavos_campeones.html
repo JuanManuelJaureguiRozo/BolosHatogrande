@@ -321,48 +321,51 @@
     if (hoja.toLowerCase().includes("octavos")) {
 
       const pares = [
-      [1, 2], [4, 5], [7, 8], [10, 11],
-      [13, 14], [16, 17], [19, 20], [22, 23]
+        [1, 2], [4, 5], [7, 8], [10, 11],
+        [13, 14], [16, 17], [19, 20], [22, 23]
       ];
 
       pares.forEach(([filaA, filaB]) => {
 
-      const rowA = rows[filaA];
-      const rowB = rows[filaB];
-      const cellA = rowA?.children[7];
-      const cellB = rowB?.children[7];
+        const rowA = rows[filaA];
+        const rowB = rows[filaB];
 
-      if (!cellA || !cellB) return;
+        const cellA = rowA?.children[7];
+        const cellB = rowB?.children[7];
 
-      const rawA = cellA.textContent.trim();
-      const rawB = cellB.textContent.trim();
+        if (!cellA || !cellB) return;
 
-      // ❌ Si alguna está vacía → no resaltar
-      if (rawA === "" || rawB === "") return;
+        const rawA = cellA.textContent.trim();
+        const rawB = cellB.textContent.trim();
 
-      const valA = Number(rawA.replace(/[^0-9.-]/g, ""));
-      const valB = Number(rawB.replace(/[^0-9.-]/g, ""));
+        // 🛑 Si ambas están vacías → NO resaltar
+        if (rawA === "" && rawB === "") return;
 
-      // ❌ Si alguna NO es número → no resaltar
-      if (isNaN(valA) || isNaN(valB)) return;
+        // 🛑 Si solo una está vacía → NO resaltar
+        if (rawA === "" || rawB === "") return;
 
-      // Limpia estilos previos solo de la celda 7 de ambas filas
-      [rowA, rowB].forEach(row => {
-        const cell = row.children[7];
-        if (cell) {
-        cell.style.backgroundColor = "";
-        cell.style.color = "";
-        cell.style.fontWeight = "";
-        }
-      });
+        const valA = Number(rawA.replace(/[^0-9.-]/g, ""));
+        const valB = Number(rawB.replace(/[^0-9.-]/g, ""));
 
-      // ⭐ Ambas celdas llenas → resaltar solo la celda 7 del mayor
-      const ganadorCell = valA > valB ? cellA : cellB;
-      if (ganadorCell) {
+        // 🛑 Si alguno no es número → NO resaltar
+        if (isNaN(valA) || isNaN(valB)) return;
+
+        // 🔄 Reset estilos previos
+        [cellA, cellB].forEach(cell => {
+          cell.style.backgroundColor = "";
+          cell.style.color = "";
+          cell.style.fontWeight = "";
+        });
+
+        // ⭐ Determinar ganador SOLO cuando hay números válidos
+        if (valA === valB) return; // 🛑 Empate → NO resaltar
+
+        const ganadorCell = valA > valB ? cellA : cellB;
+
         ganadorCell.style.backgroundColor = "#ffd9b3";
         ganadorCell.style.color = "black";
         ganadorCell.style.fontWeight = "bold";
-      }
+
       });
     }
 
