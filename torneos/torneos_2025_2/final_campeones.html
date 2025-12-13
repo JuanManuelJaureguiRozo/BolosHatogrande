@@ -244,6 +244,11 @@
   <!-- Aquí va la tabla -->
   <div class="table-responsive mt-4" id="tabla-resultados" style="display:none;"></div>
   <div id="mejor-linea" class="mt-4"></div>
+  <div id="nota-hcp"
+      class="alert alert-info mt-3"
+      style="max-width:600px;margin:auto; display:none;">
+    Nota: las líneas publicadas ya tienen el HCP añadido
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -303,6 +308,7 @@
 
       tabla.appendChild(table);
       tabla.style.display = "block";
+      document.getElementById("nota-hcp").style.display = "block";
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
