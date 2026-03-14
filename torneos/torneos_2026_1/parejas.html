@@ -505,9 +505,11 @@
           }
         }
 
+
         let lineaConHCP = 0;
         let bestGroupIndex1 = -1;
         let maxIndex1 = -1;
+        let menorHCP = Infinity;
 
         for (let i = 0; i < lines1.length; i += 2) {
           const group1 = lines1.slice(i, i + 2);
@@ -528,15 +530,21 @@
           }
 
           const groupSum1 = Math.max(...positionalSums1);
-          if (groupSum1 > lineaConHCP) {
+          // Si hay empate, priorizar menor HCP
+          if (
+            groupSum1 > lineaConHCP ||
+            (groupSum1 === lineaConHCP && hcpTotal < menorHCP)
+          ) {
             if (maxIndex1 === 0) {
               lineaConHCP = 0;
               bestGroupIndex1 = -1;
               maxIndex1 = 0;
+              menorHCP = Infinity;
             } else {
               lineaConHCP = groupSum1;
               bestGroupIndex1 = i;
               maxIndex1 = positionalSums1.indexOf(groupSum1);
+              menorHCP = hcpTotal;
             }
           }
         }
