@@ -308,15 +308,28 @@
         const categoryText = categoryCell?.textContent.trim().toUpperCase();
 
         if (categoryText && categoryColors[categoryText]) {
-          // Color for the category cell
+          // Color for the category cell (leave text as is)
           categoryCell.style.backgroundColor = categoryColors[categoryText];
           categoryCell.style.color = "black";
           categoryCell.style.fontWeight = "bold";
-          // Color for the whole row
-          for (let k = 0; k < cells.length; k++) {
-            if (k !== 1) { // Avoid overriding category cell styles
-              cells[k].style.backgroundColor = categoryColors[categoryText];
-            }
+
+          // Combine cells from k=2 onwards into one cell
+          let combinedText = "";
+          const originalLength = cells.length;
+          for (let k = 2; k < originalLength; k++) {
+            combinedText += cells[k].textContent + (k < originalLength - 1 ? " " : "");
+          }
+          // Remove all cells from k=3 onwards
+          while (cells.length > 3) {
+            cells[3].remove();
+          }
+          // Set the combined text and correct colspan for the new cell
+          if (cells.length > 2) {
+            cells[2].textContent = combinedText.trim();
+            cells[2].colSpan = originalLength - 2;
+            cells[2].style.backgroundColor = categoryColors[categoryText];
+            cells[2].style.color = "black";
+            cells[2].style.fontWeight = "bold";
           }
         }
 
