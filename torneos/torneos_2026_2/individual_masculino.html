@@ -241,7 +241,7 @@
       const json = await res.json();
 
       if (!json || !json.headers || !json.data) {
-        loader.innerHTML = `<p class="text-danger mt-3">No se encontraron resultados para mostrar.</p>`;
+        if (loader) loader.innerHTML = `<p class="text-danger mt-3">No se encontraron resultados para mostrar.</p>`;
         return;
       }
 
@@ -280,11 +280,11 @@
 
       tabla.appendChild(table);
       tabla.style.display = "block";
-      loader.style.display = "none";
+      if (loader) loader.remove();
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
-      loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
+      if (loader) loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
     }
   }
 
