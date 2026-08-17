@@ -230,12 +230,14 @@
 <script>
   const SHEET_URL = "https://script.google.com/macros/s/AKfycbyl9H4nY_hG67q1vTJlAYi-6Wr82eKmrWRV99PbF6EHIFgTYivLskbI1oNj4NZyvvpx/exec?hoja=Individual%20Masculino%202026-2%20Ordenado";
 
+  let ultimoDataJSON = null; // para evitar redibujar si no cambió nada
+
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
     const tabla = document.getElementById("tabla-resultados");
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "no-store" });
       const json = await res.json();
 
       if (!json || !json.headers || !json.data) {
@@ -243,23 +245,26 @@
         return;
       }
 
+      const jsonString = JSON.stringify(json);
+      if (jsonString === ultimoDataJSON) return;
+      ultimoDataJSON = jsonString;
+
+      tabla.innerHTML = "";
+
       const table = document.createElement("table");
       table.className = "table table-bordered table-striped";
 
       const thead = document.createElement("thead");
       const trHead = document.createElement("tr");
-
       json.headers.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
         trHead.appendChild(th);
       });
-
       thead.appendChild(trHead);
       table.appendChild(thead);
 
       const tbody = document.createElement("tbody");
-
       json.data.forEach(row => {
         const tr = document.createElement("tr");
         row.forEach(cell => {
@@ -269,21 +274,18 @@
         });
         tbody.appendChild(tr);
       });
-
       table.appendChild(tbody);
 
       resaltarCeldas(table, url);
 
       tabla.appendChild(table);
       tabla.style.display = "block";
+      loader.style.display = "none";
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
       loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
-      return;
     }
-
-    loader.remove();
   }
 
   function resaltarCeldas(table, url) {
@@ -306,13 +308,11 @@
         const categoryText = categoryCell?.textContent.trim().toUpperCase();
 
         if (categoryText && categoryColors[categoryText]) {
-          // Color for the category cell
           categoryCell.style.backgroundColor = categoryColors[categoryText];
           categoryCell.style.color = "black";
           categoryCell.style.fontWeight = "bold";
-          // Color for the whole row
           for (let k = 0; k < cells.length; k++) {
-            if (k !== 0) { // Avoid overriding category cell styles
+            if (k !== 0) {
               cells[k].style.backgroundColor = categoryColors[categoryText];
             }
           }
@@ -328,7 +328,6 @@
       }
     }
 
-    // Header
     const headers = table.querySelectorAll("thead th");
     headers.forEach(th => {
       th.style.backgroundColor = "#004c3f";
@@ -337,6 +336,11 @@
   }
 
   fetchSheetAsTable(SHEET_URL);
+  setInterval(() => fetchSheetAsTable(SHEET_URL), 2000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) fetchSheetAsTable(SHEET_URL);
+  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
