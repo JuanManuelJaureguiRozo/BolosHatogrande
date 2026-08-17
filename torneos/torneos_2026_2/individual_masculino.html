@@ -230,7 +230,58 @@
 <script>
   const SHEET_URL = "https://script.google.com/macros/s/AKfycbyl9H4nY_hG67q1vTJlAYi-6Wr82eKmrWRV99PbF6EHIFgTYivLskbI1oNj4NZyvvpx/exec?hoja=Individual%20Masculino%202026-2%20Ordenado";
 
-  let ultimoDataJSON = null; // para evitar redibujar si no cambió nada
+  let ultimoDataJSON = null;
+  let tablaActual = null; // referencia a la tabla ya construida
+
+  function construirTabla(json) {
+    const table = document.createElement("table");
+    table.className = "table table-bordered table-striped";
+
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    json.headers.forEach(header => {
+      const th = document.createElement("th");
+      th.textContent = header;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    json.data.forEach(row => {
+      const tr = document.createElement("tr");
+      row.forEach(cell => {
+        const td = document.createElement("td");
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    return table;
+  }
+
+  function actualizarCeldas(tablaVieja, json) {
+    const filasViejas = tablaVieja.querySelectorAll("tbody tr");
+
+    // Si cambió el número de filas (se agregó/quitó un jugador), reconstruir todo
+    if (filasViejas.length !== json.data.length) {
+      return false;
+    }
+
+    filasViejas.forEach((tr, i) => {
+      const celdas = tr.children;
+      json.data[i].forEach((valorNuevo, j) => {
+        const celda = celdas[j];
+        if (celda && celda.textContent !== String(valorNuevo)) {
+          celda.textContent = valorNuevo;
+        }
+      });
+    });
+
+    return true;
+  }
 
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
@@ -246,41 +297,29 @@
       }
 
       const jsonString = JSON.stringify(json);
-      if (jsonString === ultimoDataJSON) return;
+      if (jsonString === ultimoDataJSON) return; // nada cambió, no tocar el DOM
       ultimoDataJSON = jsonString;
 
-      tabla.innerHTML = "";
-
-      const table = document.createElement("table");
-      table.className = "table table-bordered table-striped";
-
-      const thead = document.createElement("thead");
-      const trHead = document.createElement("tr");
-      json.headers.forEach(header => {
-        const th = document.createElement("th");
-        th.textContent = header;
-        trHead.appendChild(th);
-      });
-      thead.appendChild(trHead);
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-      json.data.forEach(row => {
-        const tr = document.createElement("tr");
-        row.forEach(cell => {
-          const td = document.createElement("td");
-          td.textContent = cell;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-
-      resaltarCeldas(table, url);
-
-      tabla.appendChild(table);
-      tabla.style.display = "block";
-      if (loader) loader.remove();
+      if (tablaActual) {
+        // Ya existe una tabla: intentar actualizar en el lugar
+        const actualizadoOk = actualizarCeldas(tablaActual, json);
+        if (actualizadoOk) {
+          resaltarCeldas(tablaActual, url); // reaplicar colores tras el cambio de texto
+        } else {
+          // Cambió la estructura (más/menos filas): reconstruir
+          tabla.innerHTML = "";
+          tablaActual = construirTabla(json);
+          resaltarCeldas(tablaActual, url);
+          tabla.appendChild(tablaActual);
+        }
+      } else {
+        // Primera carga
+        tablaActual = construirTabla(json);
+        resaltarCeldas(tablaActual, url);
+        tabla.appendChild(tablaActual);
+        tabla.style.display = "block";
+        if (loader) loader.remove();
+      }
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
@@ -317,6 +356,9 @@
               cells[k].style.backgroundColor = categoryColors[categoryText];
             }
           }
+        } else {
+          categoryCell.style.backgroundColor = "";
+          categoryCell.style.fontWeight = "";
         }
 
         for (let j = 3; j <= 12; j++) {
@@ -324,6 +366,8 @@
           const value = parseInt(cell?.textContent.trim());
           if (!isNaN(value) && value >= 200) {
             cell.style.backgroundColor = "#ffeb3b";
+          } else if (cell) {
+            cell.style.backgroundColor = categoryColors[categoryText] || "";
           }
         }
       }
@@ -337,7 +381,7 @@
   }
 
   fetchSheetAsTable(SHEET_URL);
-  setInterval(() => fetchSheetAsTable(SHEET_URL), 2000);
+  setInterval(() => fetchSheetAsTable(SHEET_URL), 20000);
 
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) fetchSheetAsTable(SHEET_URL);
