@@ -241,7 +241,7 @@
 </footer>
 
 <script>
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbyIBykHdiHIOLDtIwFN6uR9-BA01SITMTdAwni6JTe38Ms8aqTzaFmcb8M0VR48PYOQlA/exec?hoja=Parejas%202026-2%20Ordenado";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbxcvhoVvW6ijzSWvvrKcw4ZozgVKNY_4yISRRJ6nr7ehptXSSeuXhgbqfeQ6fDrXGmitQ/exec?hoja=Parejas%202026-2%20Ordenado";
 
   let ultimoDataJSON = null;
   let tablaActual = null;
@@ -322,11 +322,18 @@
     const mejorPareja = document.getElementById("mejor-pareja");
 
     try {
-      const res = await fetch(url);
-      const json = await res.json();
+      const res = await fetch(url, { cache: "no-store" });
+      const contentType = res.headers.get("content-type") || "";
+      const responseText = await res.text();
+
+      if (!res.ok || !contentType.includes("application/json")) {
+        throw new Error(`El endpoint respondió ${res.status} con ${contentType || "contenido no JSON"}`);
+      }
+
+      const json = JSON.parse(responseText);
 
       if (!json || !json.headers || !json.data) {
-        loader.innerHTML = `<p class="text-danger mt-3">No se encontraron resultados para mostrar.</p>`;
+        if (loader) loader.innerHTML = `<p class="text-danger mt-3">No se encontraron resultados para mostrar.</p>`;
         return;
       }
 
@@ -394,7 +401,7 @@
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
-      loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
+      if (loader) loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados: ${err.message}</p>`;
       return;
     }
 
