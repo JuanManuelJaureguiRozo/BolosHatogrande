@@ -24,6 +24,53 @@
       margin-bottom: 2rem;
     }
 
+    .titulo-con-ayuda {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .boton-hcp {
+      border: 1px solid #198754;
+      color: #198754;
+      background-color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .boton-hcp:hover,
+    .boton-hcp:focus {
+      background-color: #198754;
+      color: #ffffff;
+    }
+
+    .modal-hcp .modal-content {
+      border: 0;
+      border-top: 6px solid #004c3f;
+      border-radius: 14px;
+      box-shadow: 0 12px 35px rgba(0, 76, 63, 0.25);
+    }
+
+    .modal-hcp .modal-header {
+      background-color: #e8f3f0;
+      color: #004c3f;
+    }
+
+    .formula-hcp {
+      background-color: #004c3f;
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
     footer {
       background-color: #004c3f;
       color: white;
@@ -218,7 +265,12 @@
 <div id="menu-overlay" class="menu-overlay"></div>  
 
 <div class="container contenido text-center">
-  <h1>Resultados Torneo - Parejas Segundo Semestre</h1>
+  <div class="titulo-con-ayuda">
+    <h1 class="mb-0">Resultados Torneo - Parejas Segundo Semestre</h1>
+    <button type="button" class="boton-hcp" data-bs-toggle="modal" data-bs-target="#modalHcp">
+      ¿Cómo fue calculado tu HCP?
+    </button>
+  </div>
 
   <!-- Indicador de carga -->
   <div id="loader" class="mt-4 d-flex justify-content-center align-items-center flex-column">
@@ -231,6 +283,27 @@
   <!-- Aquí va la tabla -->
   <div class="table-responsive mt-4" id="tabla-resultados" style="display:none;"></div>
   <div id="mejor-pareja" class="mt-4"></div>
+</div>
+
+<div class="modal fade modal-hcp" id="modalHcp" tabindex="-1" aria-labelledby="modalHcpLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="modalHcpLabel">Así se calculó el HCP de la pareja</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-start">
+        <p>Para calcular el HCP de una pareja, se toman los HCP individuales de ambos jugadores y se suman.</p>
+        <div class="formula-hcp mb-3">HCP de la pareja = (HCP 1 + HCP 2) × 70%</div>
+        <p class="mb-2"><strong>Ejemplo:</strong> si una pareja tiene HCP de 2 y 4:</p>
+        <p class="text-center fs-5 mb-3">(2 + 4) × 0,70 = 4,2 → <strong>4</strong></p>
+        <p class="mb-0 text-muted">El resultado se redondea al entero más cercano y luego se suma a la línea obtenida.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Entendido</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- FOOTER -->
