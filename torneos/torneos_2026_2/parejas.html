@@ -291,15 +291,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title fs-5" id="modalHcpLabel">Así se calculó el HCP de la pareja</h2>
+        <h2 class="modal-title fs-5" id="modalHcpLabel">Así se calculó tu HCP</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body text-start">
-        <p>Para calcular el HCP de una pareja, se toman los HCP individuales de ambos jugadores y se suman.</p>
-        <div class="formula-hcp mb-3">HCP de la pareja = (HCP 1 + HCP 2) × 70%</div>
-        <p class="mb-2"><strong>Ejemplo:</strong> si una pareja tiene HCP de 2 y 4:</p>
-        <p class="text-center fs-5 mb-3">(2 + 4) × 0,70 = 4,2 → <strong>4</strong></p>
-        <p class="mb-0 text-muted">El resultado se redondea al entero más cercano y luego se suma a la línea obtenida.</p>
+        <p>El HCP se calcula de manera individual, tomando como referencia al jugador con el mayor promedio de cada género.</p>
+        <div class="formula-hcp mb-3">HCP individual = (promedio de referencia − tu promedio) × 70%</div>
+        <p class="mb-2"><strong>Ejemplo:</strong> si el promedio de referencia es 180 y tu promedio es 174:</p>
+        <p class="text-center fs-5 mb-3">(180 − 174) × 0,70 = 4,2 → <strong>4</strong></p>
+        <p class="mb-0 text-muted">El resultado se redondea al entero más cercano. Ese es tu HCP individual y se aplica a tus líneas.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-success" data-bs-dismiss="modal">Entendido</button>
@@ -351,7 +351,7 @@
 
     const rows = tbody.querySelectorAll("tr");
     const totalCols = json.headers.length;
-    const sharedColumns = [0, 2, totalCols - 2, totalCols - 1];
+    const sharedColumns = [0, totalCols - 2, totalCols - 1];
 
     for (let i = 0; i < rows.length; i += 2) {
       const firstRow = rows[i];
@@ -515,7 +515,7 @@
 
     for (let i = 0; i < rows.length; i++) {
       if (hoja.includes("pareja")) {
-        for (let j = 2; j <= 12; j++) {
+        for (let j = 3; j <= 12; j++) {
           const cell = rows[i].querySelector(`[data-column-index="${j}"]`);
           const value = parseInt(getColumnValue(rows[i], j), 10);
           if (!isNaN(value) && value >= 200) {
