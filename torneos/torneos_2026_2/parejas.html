@@ -327,7 +327,22 @@
       const responseText = await res.text();
 
       if (!res.ok || !contentType.includes("application/json")) {
-        throw new Error(`El endpoint respondió ${res.status} con ${contentType || "contenido no JSON"}`);
+
+        if (res.status === 404) {
+          console.warn("Endpoint temporalmente no disponible. Reintentando en 3 segundos...");
+
+          setTimeout(() => {
+            fetchSheetAsTable(url);
+          }, 3000);
+
+          return;
+        }
+
+        throw new Error(
+          `El endpoint respondió ${res.status} con ${
+            contentType || "contenido no JSON"
+          }`
+        );
       }
 
       const json = JSON.parse(responseText);
@@ -566,11 +581,17 @@
     return null;
   }
 
-  fetchSheetAsTable(SHEET_URL);
-  setInterval(() => fetchSheetAsTable(SHEET_URL), 20000);
+  async function updateLoop() {
+    await fetchSheetAsTable(SHEET_URL);
+    setTimeout(updateLoop, 20000);
+  }
+
+  updateLoop();
 
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) fetchSheetAsTable(SHEET_URL);
+    if (!document.hidden) {
+      fetchSheetAsTable(SHEET_URL);
+    }
   });
 </script>
 
