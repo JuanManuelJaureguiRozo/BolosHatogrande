@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resultados Individual Femenino Primer Semestre</title>
+  <title>Resultados Parejas Segundo Semestre</title>
   <link rel="icon" href="../../img/faviconHG.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -80,7 +80,7 @@
     }
   
     .navbar-custom .dropdown-item:hover {
-      background-color: #f0f0f0;
+      background-color: #91a7a3;
       color: #000;
     }
   
@@ -104,6 +104,7 @@
       display: block;
     }
   
+    /* Menú lateral en móviles + reordenar logo */
     @media (max-width: 992px) {
       .navbar-collapse {
         position: fixed;
@@ -214,10 +215,10 @@
       </div>
     </div>
   </nav>
-<div id="menu-overlay" class="menu-overlay"></div>    
+<div id="menu-overlay" class="menu-overlay"></div>  
 
 <div class="container contenido text-center">
-  <h1>Resultados Torneo - Individual Femenino Primer Semestre</h1>
+  <h1>Resultados Torneo - Parejas Segundo Semestre</h1>
 
   <!-- Indicador de carga -->
   <div id="loader" class="mt-4 d-flex justify-content-center align-items-center flex-column">
@@ -229,6 +230,7 @@
 
   <!-- Aquí va la tabla -->
   <div class="table-responsive mt-4" id="tabla-resultados" style="display:none;"></div>
+  <div id="mejor-pareja" class="mt-4"></div>
 </div>
 
 <!-- FOOTER -->
@@ -239,11 +241,12 @@
 </footer>
 
 <script>
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbxfHus4aXkB7cJLlOWUNKPpgmLLqr7KnTGJ6QzbQGNniJaOTbeUTUB8_1LKQt6eQQmW/exec?hoja=Individual%20Femenino%202026-1%20Ordenado";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbyIBykHdiHIOLDtIwFN6uR9-BA01SITMTdAwni6JTe38Ms8aqTzaFmcb8M0VR48PYOQlA/exec?hoja=Parejas%202026-2%20Ordenado";
 
   async function fetchSheetAsTable(url) {
     const loader = document.getElementById("loader");
     const tabla = document.getElementById("tabla-resultados");
+    const mejorPareja = document.getElementById("mejor-pareja");
 
     try {
       const res = await fetch(url);
@@ -271,22 +274,107 @@
 
       const tbody = document.createElement("tbody");
 
-      json.data.forEach(row => {
-        const tr = document.createElement("tr");
-        row.forEach(cell => {
-          const td = document.createElement("td");
-          td.textContent = cell;
-          tr.appendChild(td);
+        json.data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          for (let i = 0; i < json.headers.length; i++) {
+            const td = document.createElement("td");
+            td.textContent = row[i] ?? ""; // Usa string vacío si no hay valor
+            td.dataset.columnIndex = i;
+            tr.dataset[`column${i}`] = row[i] ?? "";
+            tr.appendChild(td);
+          }
+
+          tbody.appendChild(tr);
         });
-        tbody.appendChild(tr);
-      });
 
       table.appendChild(tbody);
 
-      resaltarCeldas(table, url);
+      if (new URL(url).searchParams.get("hoja")?.toLowerCase().includes("pareja")) {
+        const rows = tbody.querySelectorAll("tr");
+
+        for (let i = 0; i < rows.length; i += 2) {
+          const firstRow = rows[i];
+          const secondRow = rows[i + 1];
+
+          if (!firstRow || !secondRow) continue;
+
+          const firstCells = Array.from(firstRow.cells);
+          const secondCells = Array.from(secondRow.cells);
+          const totalCols = json.headers.length;
+          const secondLastIdx = totalCols - 2;
+          const lastIdx = totalCols - 1;
+
+          // Verificamos que haya par
+          if (!secondRow) continue;
+
+          // Verificamos que haya celdas suficientes
+          if (
+            firstCells.length <= lastIdx ||
+            secondCells.length <= lastIdx
+          ) continue;
+
+          // Fusionar columnas compartidas usando sus índices originales.
+          [0, 2, secondLastIdx, lastIdx].forEach(columnIndex => {
+            const firstCell = firstCells[columnIndex];
+            const secondCell = secondCells[columnIndex];
+
+            if (!firstCell || !secondCell) return;
+
+            firstCell.rowSpan = 2;
+            firstCell.style.textAlign = "center";
+            firstCell.classList.add("align-middle");
+            secondCell.remove();
+          });
+        }
+      }
+
+      const result = resaltarCeldas(table, url);
 
       tabla.appendChild(table);
       tabla.style.display = "block";
+
+      // Mostrar mejor línea sin HCP (para parejas)
+      if (result && result.sinHCP.puntaje != 0) {
+
+        const card = document.createElement("div");
+        card.className = "card mt-3 shadow-sm border-success mx-auto";
+        card.style.maxWidth = "400px";
+
+        card.innerHTML = `
+          <div class="card-body text-center">
+            <h5 class="card-title text-success">Línea más alta sin HCP</h5>
+            <p class="card-text mb-1">
+              <strong>${result.sinHCP.jugadores.join(" y ")}</strong><br>
+              hicieron la línea más alta sin HCP en la línea ${result.sinHCP.linea}
+            </p>
+            <h2 class="text-dark">${result.sinHCP.puntaje}</h2>
+          </div>
+        `;
+
+        mejorPareja.appendChild(card);
+      }
+
+      // Mostrar mejor línea con HCP (para parejas)
+      if (result && result.conHCP.puntaje != 0) {
+
+        const card = document.createElement("div");
+        card.className = "card mt-3 shadow-sm border-success mx-auto";
+        card.style.maxWidth = "400px";
+
+        card.innerHTML = `
+          <div class="card-body text-center">
+            <h5 class="card-title text-success">Línea más alta con HCP</h5>
+            <p class="card-text mb-1">
+              <strong>${result.conHCP.jugadores.join(" y ")}</strong><br>
+              hicieron la línea más alta con HCP en la línea ${result.conHCP.linea}
+            </p>
+            <h2 class="text-dark">${result.conHCP.puntaje}</h2>
+          </div>
+        `;
+
+        mejorPareja.appendChild(card);
+      }
 
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
@@ -299,40 +387,28 @@
 
   function resaltarCeldas(table, url) {
     const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase() || "";
+
     const rows = table.querySelectorAll("tbody tr");
+    const rows1 = Array.from(table.querySelectorAll("tbody tr"));
+    const getColumnValue = (row, columnIndex) => {
+      const cell = row.querySelector(`[data-column-index="${columnIndex}"]`);
+      return cell?.innerText.trim() ?? row.dataset[`column${columnIndex}`] ?? "";
+    };
+    const getColumnValues = (row, start, end) => {
+      return Array.from({ length: end - start }, (_, offset) =>
+        getColumnValue(row, start + offset)
+      );
+    };
 
     for (let i = 0; i < rows.length; i++) {
-      const cells = rows[i].children;
-
-      if (hoja.includes("individual")) {
-        const categoryColors = {
-          "CATEGORÍA ELITE Y PRIMERA": "#cce5ff",
-          "SEGUNDA CATEGORÍA": "#fff3cd",
-          "TERCERA CATEGORÍA": "#f8d7da",
-          "CUARTA CATEGORÍA": "#d2b4de",
-        };
-
-        const categoryCell = cells[0];
-        const categoryText = categoryCell?.textContent.trim().toUpperCase();
-
-        if (categoryText && categoryColors[categoryText]) {
-          // Color for the category cell
-          categoryCell.style.backgroundColor = categoryColors[categoryText];
-          categoryCell.style.color = "black";
-          categoryCell.style.fontWeight = "bold";
-          // Color for the whole row
-          for (let k = 0; k < cells.length; k++) {
-            if (k !== 0) { // Avoid overriding category cell styles
-              cells[k].style.backgroundColor = categoryColors[categoryText];
-            }
-          }
-        }
-
-        for (let j = 3; j <= 12; j++) {
-          const cell = cells[j];
-          const value = parseInt(cell?.textContent.trim());
+      if (hoja.includes("pareja")) {
+        for (let j = 2; j <= 12; j++) {
+          const cell = rows[i].querySelector(`[data-column-index="${j}"]`);
+          const value = parseInt(getColumnValue(rows[i], j), 10);
           if (!isNaN(value) && value >= 200) {
-            cell.style.backgroundColor = "#ffeb3b";
+            if (cell) {
+              cell.style.backgroundColor = "#ffeb3b";
+            }
           }
         }
       }
@@ -344,6 +420,127 @@
       th.style.backgroundColor = "#004c3f";
       th.style.color = "white";
     });
+
+    // Mayores líneas
+    if (hoja.includes("pareja")) {
+
+      // ------------------------- Lógica Línea sin HCP ------------------------------
+
+      // 1) Construir arreglo con las 10 líneas de cada jugador
+      const lines = rows1.map(row => {
+        return getColumnValues(row, 3, 13);
+      });
+
+      // 2) Calcular la línea más alta de todas las parejas
+      let lineaSinHCP = 0;
+      let bestGroupIndex = -1;
+      let maxIndex = -1;
+
+      for (let i = 0; i < lines.length; i += 2) {
+        const group = lines.slice(i, i + 2);
+        const positionalSums = Array(10).fill(0);
+
+        for (let j = 0; j < group.length; j++) {
+          for (let k = 0; k < group[j].length; k++) {
+            positionalSums[k] += parseInt(group[j][k], 10) || 0;
+          }
+        }
+
+        const groupSum = Math.max(...positionalSums);
+        if (groupSum > lineaSinHCP) {
+          lineaSinHCP = groupSum;
+          bestGroupIndex = i;
+          maxIndex = positionalSums.indexOf(groupSum) + 1; // Línea ganadora (L1..L10)
+        }
+      }
+
+      // 3) Obtener los nombres de los jugadores de esa pareja
+      const names_lines = rows1.map(row => {
+        return [getColumnValue(row, 1)];
+      });
+
+      const nombresParejaMayorLinea = names_lines.slice(bestGroupIndex, bestGroupIndex + 2)
+        .map(arr => arr[0]); // tomar solo nombre del jugador
+
+      // ------------------ Lógica Línea con HCP ---------------------------------------
+
+      const lines1 = rows1.map(row => {
+        return getColumnValues(row, 2, 13);
+      });
+
+
+        let lineaConHCP = 0;
+        let bestGroupIndex1 = -1;
+        let maxIndex1 = -1;
+        let menorHCP = Infinity;
+
+        for (let i = 0; i < lines1.length; i += 2) {
+          const group1 = lines1.slice(i, i + 2);
+
+          const positionalSums1 = new Array(11).fill(0);
+          for (let j = 0; j < group1.length; j++) {
+            for (let k = 0; k < group1[j].length; k++) {
+              positionalSums1[k] += parseInt(group1[j][k], 10) || 0;
+            }
+          }
+
+          // HCP total está en posición 0
+          const hcpTotal = positionalSums1[0];
+
+          // Sumar HCP a las demás posiciones
+          for (let k = 1; k < positionalSums1.length; k++) {
+            positionalSums1[k] += hcpTotal;
+          }
+
+          const groupSum1 = Math.max(...positionalSums1);
+          // Si hay empate, priorizar menor HCP
+          if (
+            groupSum1 > lineaConHCP ||
+            (groupSum1 === lineaConHCP && hcpTotal < menorHCP)
+          ) {
+            if (maxIndex1 === 0) {
+              lineaConHCP = 0;
+              bestGroupIndex1 = -1;
+              maxIndex1 = 0;
+              menorHCP = Infinity;
+            } else {
+              lineaConHCP = groupSum1;
+              bestGroupIndex1 = i;
+              maxIndex1 = positionalSums1.indexOf(groupSum1);
+              menorHCP = hcpTotal;
+            }
+          }
+        }
+
+        const bestGroup1 = lines1.slice(bestGroupIndex1, bestGroupIndex1 + 2);
+        const names_lines1 = Array.from(table.rows).slice(1).map(row => {
+          return [getColumnValue(row, 1)];
+        });
+
+        const bestGroupNames1 = bestGroup1.map((_, index) => {
+          return names_lines1[bestGroupIndex1 + index][0];
+        });
+
+        const nombresParejaMayorLinea1 = bestGroupNames1.map(name => name.split(",")[0]);
+
+        // -------------------------
+        // 3. Retornar resultados
+        // -------------------------
+        return {
+          sinHCP: {
+            linea: `L${maxIndex}`,
+            puntaje: lineaSinHCP,
+            jugadores: nombresParejaMayorLinea,
+          },
+          conHCP: {
+            linea: `L${maxIndex1}`,
+            puntaje: lineaConHCP,
+            jugadores: nombresParejaMayorLinea1,
+          }
+        };
+      }
+
+    return null;
   }
 
   fetchSheetAsTable(SHEET_URL);
