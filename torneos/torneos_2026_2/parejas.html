@@ -24,6 +24,28 @@
       margin-bottom: 2rem;
     }
 
+    #mejor-pareja {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .premio-card {
+      width: 100%;
+      max-width: none !important;
+      border-width: 2px;
+      background: linear-gradient(145deg, #ffffff, #eef8f5);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .premio-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0.75rem 1.5rem rgba(0, 76, 63, 0.16) !important;
+    }
+
     .titulo-con-ayuda {
       display: flex;
       justify-content: center;
@@ -489,6 +511,8 @@
         mejorPareja.appendChild(card);
       }
 
+      mostrarPremios(mejorPareja, calcularPremios(tablaActual, 2), "Pareja");
+
     } catch (err) {
       console.error("Error al cargar la tabla:", err);
       if (loader) loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados: ${err.message}</p>`;
@@ -518,10 +542,12 @@
         for (let j = 3; j <= 12; j++) {
           const cell = rows[i].querySelector(`[data-column-index="${j}"]`);
           const value = parseInt(getColumnValue(rows[i], j), 10);
+          if (!cell) continue;
+
+          // Limpiar el resaltado anterior antes de recalcular la condición.
+          cell.style.backgroundColor = "";
           if (!isNaN(value) && value >= 200) {
-            if (cell) {
-              cell.style.backgroundColor = "#ffeb3b";
-            }
+            cell.style.backgroundColor = "#ffeb3b";
           }
         }
       }
@@ -654,6 +680,65 @@
       }
 
     return null;
+  }
+
+  function calcularPremios(table, groupSize) {
+    const rows = Array.from(table.querySelectorAll("tbody tr"));
+    const groups = [];
+
+    for (let i = 0; i + groupSize <= rows.length; i += groupSize) {
+      const groupRows = rows.slice(i, i + groupSize);
+      const jugadores = groupRows.map(row => row.dataset.column1 || "").filter(Boolean);
+      const lineas = Array.from({ length: 10 }, (_, lineIndex) => {
+        return groupRows.reduce((total, row) => {
+          return total + (parseInt(row.dataset[`column${lineIndex + 3}`], 10) || 0);
+        }, 0);
+      });
+      const hcp = groupRows.reduce((total, row) => {
+        return total + (parseInt(row.dataset.column2, 10) || 0);
+      }, 0);
+
+      groups.push({
+        id: i,
+        jugadores,
+        sinHCP: Math.max(...lineas),
+        conHCP: Math.max(...lineas) + hcp,
+        lineaSinHCP: lineas.indexOf(Math.max(...lineas)) + 1,
+        lineaConHCP: lineas.indexOf(Math.max(...lineas)) + 1,
+      });
+    }
+
+    const ordenar = campo => [...groups].sort((a, b) => b[campo] - a[campo]);
+    const sinHCP = ordenar("sinHCP");
+    const conHCP = ordenar("conHCP");
+    return {
+      sinHCP: sinHCP.slice(0, 2),
+      conHCP: conHCP.slice(0, 2),
+    };
+  }
+
+  function mostrarPremios(container, premios, nombreGrupo) {
+    container.innerHTML = "";
+    const tarjetas = [
+      ["🥇 Mejor línea sin HCP", premios.sinHCP[0], "sinHCP"],
+      ["🥇 Mejor línea con HCP", premios.conHCP[0], "conHCP"],
+      ["🥈 Segunda línea sin HCP", premios.sinHCP[1], "sinHCP"],
+      ["🥈 Segunda línea con HCP", premios.conHCP[1], "conHCP"],
+    ];
+
+    tarjetas.forEach(([titulo, premio, campo]) => {
+      if (!premio) return;
+      const card = document.createElement("div");
+      card.className = "card premio-card shadow-sm border-success mx-auto mb-3";
+      card.innerHTML = `
+        <div class="card-body text-center">
+          <h5 class="card-title text-success">${titulo}</h5>
+          <p class="card-text mb-1"><strong>${premio.jugadores.join(" y ")}</strong></p>
+          <p class="text-muted mb-2">${nombreGrupo} con la línea L${campo === "sinHCP" ? premio.lineaSinHCP : premio.lineaConHCP}</p>
+          <h2 class="text-dark mb-0">${premio[campo]}</h2>
+        </div>`;
+      container.appendChild(card);
+    });
   }
 
   async function updateLoop() {

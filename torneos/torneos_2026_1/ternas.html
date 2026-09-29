@@ -24,6 +24,27 @@
       margin-bottom: 2rem;
     }
 
+    #mejor-terna {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .premio-card {
+      width: 100%;
+      border-width: 2px;
+      background: linear-gradient(145deg, #ffffff, #eef8f5);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .premio-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0.75rem 1.5rem rgba(0, 76, 63, 0.16) !important;
+    }
+
     footer {
       background-color: #004c3f;
       color: white;
@@ -230,6 +251,7 @@
 
   <!-- Aquí va la tabla -->
   <div class="table-responsive mt-4" id="tabla-resultados" style="display:none;"></div>
+  <div id="mejor-terna" class="mt-4"></div>
 </div>
 
 <!-- FOOTER -->
@@ -280,6 +302,8 @@ async function fetchSheetAsTable(url) {
       for (let i = 0; i < json.headers.length; i++) {
         const td = document.createElement("td");
         td.textContent = row[i] ?? "";
+        td.dataset.columnIndex = i;
+        tr.dataset[`column${i}`] = row[i] ?? "";
         tr.appendChild(td);
       }
 
@@ -352,6 +376,7 @@ async function fetchSheetAsTable(url) {
 
     // 🎨 ESTILOS
     resaltarCeldas(table, url);
+    mostrarPremios(document.getElementById("mejor-terna"), calcularPremios(table, 3), "Terna");
 
     tabla.appendChild(table);
     tabla.style.display = "block";
@@ -449,6 +474,36 @@ function resaltarCeldas(table, url) {
   table.querySelectorAll("thead th").forEach(th => {
     th.style.backgroundColor = "#004c3f";
     th.style.color = "white";
+  });
+}
+
+function calcularPremios(table, groupSize) {
+  const rows = Array.from(table.querySelectorAll("tbody tr"))
+    .filter(row => !(row.dataset.column0 || "").toUpperCase().includes("CATEGORÍA"));
+  const groups = [];
+  for (let i = 0; i + groupSize <= rows.length; i += groupSize) {
+    const groupRows = rows.slice(i, i + groupSize);
+    const lineas = Array.from({ length: 10 }, (_, lineIndex) => groupRows.reduce((total, row) => total + (parseInt(row.dataset[`column${lineIndex + 3}`], 10) || 0), 0));
+    const value = Math.max(...lineas);
+    const hcp = groupRows.reduce((total, row) => total + (parseInt(row.dataset.column2, 10) || 0), 0);
+    groups.push({ id: i, jugadores: groupRows.map(row => row.dataset.column1).filter(Boolean), sinHCP: value, conHCP: value + hcp, lineaSinHCP: lineas.indexOf(value) + 1, lineaConHCP: lineas.indexOf(value) + 1 });
+  }
+  const ordenar = campo => [...groups].sort((a, b) => b[campo] - a[campo]);
+  return {
+    sinHCP: ordenar("sinHCP").slice(0, 2),
+    conHCP: ordenar("conHCP").slice(0, 2),
+  };
+}
+
+function mostrarPremios(container, premios, nombreGrupo) {
+  container.innerHTML = "";
+  [["🥇 Mejor línea sin HCP", premios.sinHCP[0], "sinHCP"], ["🥇 Mejor línea con HCP", premios.conHCP[0], "conHCP"], ["🥈 Segunda línea sin HCP", premios.sinHCP[1], "sinHCP"], ["🥈 Segunda línea con HCP", premios.conHCP[1], "conHCP"]].forEach(([titulo, premio, campo]) => {
+    if (!premio) return;
+    const card = document.createElement("div");
+    card.className = "card premio-card shadow-sm border-success mx-auto mb-3";
+    card.style.maxWidth = "520px";
+    card.innerHTML = `<div class="card-body text-center"><h5 class="card-title text-success">${titulo}</h5><p class="card-text mb-1"><strong>${premio.jugadores.join(" y ")}</strong></p><p class="text-muted mb-2">${nombreGrupo} con la línea L${campo === "sinHCP" ? premio.lineaSinHCP : premio.lineaConHCP}</p><h2 class="text-dark mb-0">${premio[campo]}</h2></div>`;
+    container.appendChild(card);
   });
 }
 
