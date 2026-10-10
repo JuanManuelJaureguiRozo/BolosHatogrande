@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora de HCP para ternas - Bolos Hatogrande</title>
+  <link rel="icon" href="../img/faviconHG.png" type="image/png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      overflow-x: hidden;
+      background-color: #f5f5f5;
+    }
+
+    .contenido {
+      flex: 1 0 auto;
+      width: min(100% - 2rem, 900px);
+      margin: 2rem auto;
+      background-color: #ffffff;
+      padding: clamp(1.25rem, 4vw, 2.5rem);
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .formula {
+      background-color: #004c3f;
+      color: white;
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .calculadora-form {
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+
+    .calculadora-terna {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding-top: 2rem;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .form-control,
+    .form-select,
+    .btn {
+      min-height: 2.75rem;
+    }
+
+    .resultado {
+      width: 100%;
+      max-width: 42rem;
+      margin-left: auto;
+      margin-right: auto;
+      overflow-wrap: anywhere;
+    }
+
+    .resultado {
+      background: linear-gradient(145deg, #ffffff, #eef8f5);
+      border: 2px solid #198754;
+      border-radius: 10px;
+    }
+
+    footer {
+      flex-shrink: 0;
+      margin-top: auto !important;
+      background-color: #004c3f;
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+
+    .navbar-custom { background-color: #004c3f; }
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-brand { color: white; }
+    .navbar-custom .dropdown-menu {
+      background-color: white !important;
+      border: 1px solid #004c3f;
+    }
+    .navbar-custom .dropdown-item { color: black !important; }
+    .navbar-custom .dropdown-item:hover { background-color: #f0f0f0; }
+    .logo-img { width: auto; height: clamp(2rem, 5vw, 2.5rem); margin-right: 10px; }
+    .navbar-brand { min-width: 0; white-space: normal; line-height: 1.2; }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1040;
+    }
+    .menu-overlay.show { display: block; }
+
+    @media (max-width: 992px) {
+      .navbar-collapse {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: min(75%, 20rem);
+        height: 100%;
+        padding: 3.5rem 1rem 1rem;
+        overflow-y: auto;
+        background-color: #004c3f !important;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .navbar-collapse.show { transform: translateX(0); }
+      .navbar-toggler {
+        z-index: 1100;
+        border: none;
+        background-color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+      .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+      }
+      body.offcanvas-open { overflow: hidden; }
+    }
+
+    @media (max-width: 576px) {
+      .navbar-brand {
+        max-width: calc(100vw - 5rem);
+        font-size: 0.95rem;
+      }
+
+      .contenido {
+        width: min(100% - 1rem, 900px);
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+      }
+
+      .formula {
+        padding: 0.75rem;
+        font-size: 0.95rem;
+      }
+
+      .resultado {
+        padding: 1rem !important;
+      }
+    }
+  </style>
+</head>
+<body data-calculadora="terna">
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <button class="navbar-toggler order-1 order-lg-0 ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand fw-bold d-flex align-items-center order-2 order-lg-1 ms-auto" href="../index.html">
+        <img src="../img/logo.png" alt="Logo Hatogrande" class="logo-img"> Bolos Hatogrande
+      </a>
+      <div class="collapse navbar-collapse order-3 order-lg-2" id="navbarNavDropdown">
+        <ul class="navbar-nav flex-column flex-lg-row">
+          <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="../index.html" role="button" data-bs-toggle="dropdown">Torneos Primer Semestre</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="torneos_2026_1/individual_masculino.html">Individual Masculino</a></li>
+              <li><a class="dropdown-item" href="torneos_2026_1/individual_femenino.html">Individual Femenino</a></li>
+              <li><a class="dropdown-item" href="torneos_2026_1/parejas.html">Parejas</a></li>
+              <li><a class="dropdown-item" href="torneos_2026_1/ternas.html">Ternas</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="../index.html" role="button" data-bs-toggle="dropdown">Torneos Segundo Semestre</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="torneos_2026_2/individual_masculino.html">Individual Masculino</a></li>
+              <li><a class="dropdown-item" href="torneos_2026_2/individual_femenino.html">Individual Femenino</a></li>
+              <li><a class="dropdown-item" href="torneos_2026_2/parejas.html">Parejas</a></li>
+              <li><a class="dropdown-item" href="torneos_2026_2/ternas.html">Ternas</a></li>
+              <li><a class="dropdown-item" href="selectivos/selectivo_femenino.html">Selectivo Femenino</a></li>
+              <li><a class="dropdown-item" href="selectivos/selectivo_masculino.html">Selectivo Masculino</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Escalafón</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="escalafon_masc.html">Masculino</a></li>
+              <li><a class="dropdown-item" href="escalafon_fem.html">Femenino</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Calculadoras de HCP</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="calculadora_hcp.html">HCP individual</a></li>
+              <li><a class="dropdown-item" href="calculadora_hcp_ternas.html">HCP para ternas</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <main class="contenido">
+    <h1 class="text-center mb-3">Calculadora de HCP para ternas</h1>
+    <p class="text-center text-muted">
+      Calcula el HCP de una terna según su modalidad y los HCP de sus tres integrantes.
+    </p>
+
+    <section class="mb-4 d-none">
+      <h2 class="h4">¿Cómo funciona?</h2>
+      <ol>
+        <li>Selecciona el género del escalafón que quieres consultar.</li>
+        <li>Busca tu nombre en la lista o escribe tu promedio actual.</li>
+        <li>La calculadora toma como referencia al jugador con el promedio más alto de ese género.</li>
+        <li>El resultado es la diferencia entre ambos promedios multiplicada por 0.7.</li>
+        <li>El resultado final se redondea al entero más cercano.</li>
+      </ol>
+      <div class="formula text-center">
+        HCP = redondear al entero más cercano<br>
+        ((Promedio del mejor jugador − Tu promedio) × 0.7)
+      </div>
+    </section>
+
+    <form id="calculadora" class="calculadora-form row g-3 d-none" novalidate>
+      <div class="col-12 col-md-6">
+        <label for="genero" class="form-label">Género del escalafón</label>
+        <select id="genero" class="form-select" required>
+          <option value="masculino">Masculino</option>
+          <option value="femenino">Femenino</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="jugador" class="form-label">Buscar jugador</label>
+        <input id="jugador" class="form-control" list="jugadores" placeholder="Escribe para buscar..." autocomplete="off">
+        <datalist id="jugadores"></datalist>
+        <div class="form-text">La lista se carga directamente desde el escalafón.</div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label for="promedio" class="form-label">Tu promedio actual</label>
+        <input id="promedio" class="form-control" type="number" min="0" max="300" step="0.01" placeholder="Ej. 178.50" required>
+      </div>
+      <div class="col-12 col-md-6 d-flex align-items-end">
+        <button class="btn btn-success w-100" type="submit">Calcular HCP</button>
+      </div>
+    </form>
+
+    <div id="estado" class="small text-muted mt-3 d-none" role="status">Cargando escalafones...</div>
+    <section id="resultado" class="resultado mt-4 p-4 d-none" aria-live="polite"></section>
+
+    <section class="calculadora-terna mt-2">
+      <h2 class="h4 text-center">Ingresa los integrantes</h2>
+      <p class="text-muted">
+        Selecciona el tipo de terna e ingresa el HCP de cada integrante. Puedes buscar
+        el nombre de cada jugador para cargar su HCP del escalafón automáticamente.
+      </p>
+      <div class="formula text-center mb-4">
+        HCP de la terna = redondear al entero más cercano<br>
+        (suma de HCP individuales × porcentaje del tipo de terna)
+      </div>
+
+      <form id="calculadora-terna" class="row g-3" novalidate>
+        <div class="col-12">
+          <label for="tipo-terna" class="form-label">Tipo de terna</label>
+          <select id="tipo-terna" class="form-select" required>
+            <option value="masculina">Terna masculina — 60%</option>
+            <option value="mixta">Terna mixta — 65%</option>
+            <option value="femenina">Terna femenina — 70%</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label for="integrante-1" class="form-label">Integrante 1</label>
+          <input id="integrante-1" class="form-control integrante-nombre" list="integrantes" placeholder="Buscar por nombre (opcional)" autocomplete="off">
+          <input id="hcp-1" class="form-control mt-2 integrante-hcp" type="number" min="0" step="1" placeholder="HCP del integrante 1" required>
+        </div>
+        <div class="col-12">
+          <label for="integrante-2" class="form-label">Integrante 2</label>
+          <input id="integrante-2" class="form-control integrante-nombre" list="integrantes" placeholder="Buscar por nombre (opcional)" autocomplete="off">
+          <input id="hcp-2" class="form-control mt-2 integrante-hcp" type="number" min="0" step="1" placeholder="HCP del integrante 2" required>
+        </div>
+        <div class="col-12">
+          <label for="integrante-3" class="form-label">Integrante 3</label>
+          <input id="integrante-3" class="form-control integrante-nombre" list="integrantes" placeholder="Buscar por nombre (opcional)" autocomplete="off">
+          <input id="hcp-3" class="form-control mt-2 integrante-hcp" type="number" min="0" step="1" placeholder="HCP del integrante 3" required>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-success w-100" type="submit">Calcular HCP de la terna</button>
+        </div>
+      </form>
+      <datalist id="integrantes"></datalist>
+      <section id="resultado-terna" class="resultado mt-4 p-4 d-none" aria-live="polite"></section>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p class="mb-2">© 2026 Hatogrande - Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const ENDPOINTS = {
+      masculino: "https://script.google.com/macros/s/AKfycbyfuQ6mQBnHlyCn5VSUbgItMBd7jKfOk7fC27wZULDoquJHeJx0IADRvaAcCLKsMod2/exec?hoja=Escalafon%20Masculino",
+      femenino: "https://script.google.com/macros/s/AKfycbzauXN_9IN8wx_h50cE2x7xZ0G4mwOQ7M_dDHnoJfI51IxmpdEtbqLtNgncSR0va0yZ/exec?hoja=Escalafon%20Femenino"
+    };
+    const escalafones = { masculino: [], femenino: [] };
+    const porcentajesTerna = { masculina: 0.6, mixta: 0.65, femenina: 0.7 };
+    const genero = document.getElementById("genero");
+    const jugador = document.getElementById("jugador");
+    const promedio = document.getElementById("promedio");
+    const jugadores = document.getElementById("jugadores");
+    const estado = document.getElementById("estado");
+    const resultado = document.getElementById("resultado");
+    const integrantes = document.getElementById("integrantes");
+    const resultadoTerna = document.getElementById("resultado-terna");
+
+    function normalizar(valor) {
+      return String(valor ?? "").trim().toLocaleLowerCase("es");
+    }
+
+    function cargarJugadores() {
+      jugadores.innerHTML = "";
+      escalafones[genero.value].forEach(persona => {
+        const option = document.createElement("option");
+        option.value = persona.nombre;
+        jugadores.appendChild(option);
+      });
+    }
+
+    function seleccionarJugador() {
+      const persona = escalafones[genero.value].find(item => normalizar(item.nombre) === normalizar(jugador.value));
+      if (persona) promedio.value = persona.promedio.toFixed(2);
+    }
+
+    function cargarIntegrantes() {
+      integrantes.innerHTML = "";
+      const nombres = new Set([...escalafones.masculino, ...escalafones.femenino].map(persona => persona.nombre));
+      nombres.forEach(nombre => {
+        const option = document.createElement("option");
+        option.value = nombre;
+        integrantes.appendChild(option);
+      });
+    }
+
+    function seleccionarIntegrante(event) {
+      const persona = [...escalafones.masculino, ...escalafones.femenino]
+        .find(item => normalizar(item.nombre) === normalizar(event.target.value));
+      if (persona) {
+        document.getElementById(`hcp-${event.target.id.split("-")[1]}`).value = persona.hcp;
+      }
+    }
+
+    async function cargarEscalafon(tipo) {
+      const res = await fetch(ENDPOINTS[tipo], { cache: "no-store" });
+      const json = await res.json();
+      const nombreIndex = json.headers.findIndex(header => normalizar(header) === "deportista");
+      const promedioIndex = json.headers.findIndex(header => normalizar(header) === "promedio");
+      const hcpIndex = json.headers.findIndex(header => normalizar(header) === "hcp");
+      if (nombreIndex < 0 || promedioIndex < 0 || hcpIndex < 0 || !Array.isArray(json.data)) {
+        throw new Error(`No se encontraron las columnas requeridas en el escalafón ${tipo}.`);
+      }
+      escalafones[tipo] = json.data
+        .map(row => ({
+          nombre: String(row[nombreIndex] ?? "").trim(),
+          promedio: Number.parseFloat(row[promedioIndex]),
+          hcp: Number.parseFloat(row[hcpIndex])
+        }))
+        .filter(persona => persona.nombre && Number.isFinite(persona.promedio) && Number.isFinite(persona.hcp));
+    }
+
+    document.getElementById("calculadora").addEventListener("submit", event => {
+      event.preventDefault();
+      const promedioUsuario = Number.parseFloat(promedio.value);
+      const personas = escalafones[genero.value];
+      if (!Number.isFinite(promedioUsuario) || promedioUsuario < 0 || personas.length === 0) {
+        estado.textContent = "Ingresa un promedio válido y espera a que cargue el escalafón.";
+        estado.className = "small text-danger mt-3";
+        return;
+      }
+      const mejor = personas.reduce((actual, persona) => persona.promedio > actual.promedio ? persona : actual);
+      const diferencia = Math.max(0, mejor.promedio - promedioUsuario);
+      const hcpSinRedondear = diferencia * 0.7;
+      const hcp = Math.round(hcpSinRedondear);
+      resultado.innerHTML = `
+        <h2 class="h4 text-success">Resultado estimado</h2>
+        <p class="mb-2">Tu promedio: <strong>${promedioUsuario.toFixed(2)}</strong></p>
+        <p class="mb-2">Mejor promedio (${genero.value}): <strong>${mejor.promedio.toFixed(2)}</strong> — ${mejor.nombre}</p>
+        <p class="mb-2">Diferencia: <strong>${diferencia.toFixed(2)}</strong></p>
+        <p class="mb-2">HCP antes de redondear: <strong>${hcpSinRedondear.toFixed(2)}</strong></p>
+        <h3 class="display-6 text-center text-dark mb-0">HCP redondeado: ${hcp}</h3>
+      `;
+      resultado.classList.remove("d-none");
+    });
+
+    genero.addEventListener("change", () => {
+      jugador.value = "";
+      promedio.value = "";
+      resultado.classList.add("d-none");
+      cargarJugadores();
+    });
+    jugador.addEventListener("change", seleccionarJugador);
+
+    Promise.all(Object.keys(ENDPOINTS).map(cargarEscalafon))
+      .then(() => {
+        cargarJugadores();
+        cargarIntegrantes();
+        estado.textContent = "Escalafones cargados. Puedes buscar tu nombre o escribir el promedio.";
+      })
+      .catch(error => {
+        console.error("Error al cargar escalafones:", error);
+        estado.textContent = "No fue posible cargar los escalafones. Puedes intentar de nuevo más tarde.";
+        estado.className = "small text-danger mt-3";
+      });
+
+    document.querySelectorAll(".integrante-nombre").forEach(input => {
+      input.addEventListener("change", seleccionarIntegrante);
+    });
+
+    document.getElementById("calculadora-terna").addEventListener("submit", event => {
+      event.preventDefault();
+      const tipo = document.getElementById("tipo-terna").value;
+      const hcps = [1, 2, 3].map(index => Number.parseFloat(document.getElementById(`hcp-${index}`).value));
+      if (hcps.some(hcp => !Number.isFinite(hcp) || hcp < 0)) {
+        resultadoTerna.innerHTML = `<p class="text-danger mb-0">Ingresa un HCP válido para los tres integrantes.</p>`;
+        resultadoTerna.classList.remove("d-none");
+        return;
+      }
+
+      const suma = hcps.reduce((total, hcp) => total + hcp, 0);
+      const porcentaje = porcentajesTerna[tipo];
+      const hcpSinRedondear = suma * porcentaje;
+      const hcpFinal = Math.round(hcpSinRedondear);
+      resultadoTerna.innerHTML = `
+        <h3 class="h5 text-success">Resultado de la terna</h3>
+        <p class="mb-2">Tipo: <strong>Terna ${tipo}</strong> (${porcentaje * 100}%)</p>
+        <p class="mb-2">Suma de HCP individuales: <strong>${suma.toFixed(2)}</strong></p>
+        <p class="mb-2">HCP antes de redondear: <strong>${hcpSinRedondear.toFixed(2)}</strong></p>
+        <p class="mb-0 text-center display-6">HCP de la terna: <strong>${hcpFinal}</strong></p>
+      `;
+      resultadoTerna.classList.remove("d-none");
+    });
+
+    const navbarCollapse = document.getElementById("navbarNavDropdown");
+    const overlay = document.getElementById("menu-overlay");
+    navbarCollapse.addEventListener("show.bs.collapse", () => {
+      document.body.classList.add("offcanvas-open");
+      overlay.classList.add("show");
+    });
+    navbarCollapse.addEventListener("hide.bs.collapse", () => {
+      document.body.classList.remove("offcanvas-open");
+      overlay.classList.remove("show");
+    });
+    overlay.addEventListener("click", () => bootstrap.Collapse.getInstance(navbarCollapse).hide());
+  </script>
+</body>
+</html>
