@@ -326,7 +326,7 @@
         El promedio de la terna es (promedios del escalafón + HCP individuales) ÷ 3.
         Grupo A: promedio entre 160 y 190. Grupo B: promedio de 160 o menos.
         Máximo un jugador de élite o primera por terna y, si participa, debe haber
-        al menos un jugador de tercera.
+        al menos un jugador de tercera o inferior.
       </p>
 
       <form id="calculadora-terna" class="row g-3" novalidate>
@@ -455,8 +455,13 @@
       return /CATEGORIA ELITE|PRIMERA CATEGORIA/.test(categoria);
     }
 
-    function categoriaEsTercera(categoria) {
-      return categoria === "TERCERA CATEGORIA";
+    function categoriaEsTerceraOInferior(categoria) {
+      return [
+        "TERCERA CATEGORIA",
+        "CUARTA CATEGORIA A",
+        "CUARTA CATEGORIA B",
+        "CATEGORIA PROCESO DE ESCALAFON"
+      ].includes(categoria);
     }
 
     function obtenerGrupo(promedio) {
@@ -535,16 +540,16 @@
       const jugadoresEspeciales = jugadoresTerna.filter(jugador =>
         jugador && categoriaEsEliteOPrimera(jugador.categoria)
       );
-      const tieneTercera = jugadoresTerna.some(jugador =>
-        jugador && categoriaEsTercera(jugador.categoria)
+      const tieneTerceraOInferior = jugadoresTerna.some(jugador =>
+        jugador && categoriaEsTerceraOInferior(jugador.categoria)
       );
       const restricciones = [];
 
       if (jugadoresEspeciales.length > 1) {
         restricciones.push("Una terna puede tener máximo un jugador de élite o primera categoría.");
       }
-      if (jugadoresEspeciales.length > 0 && !tieneTercera) {
-        restricciones.push("Si participa un jugador de élite o primera categoría, debe haber al menos un jugador de tercera categoría.");
+      if (jugadoresEspeciales.length > 0 && !tieneTerceraOInferior) {
+        restricciones.push("Si participa un jugador de élite o primera categoría, debe haber al menos un jugador de tercera categoría o inferior.");
       }
       if (grupo === "B" && jugadoresEspeciales.length > 0) {
         restricciones.push("Un jugador de élite o primera categoría no puede participar en una terna del grupo B.");
