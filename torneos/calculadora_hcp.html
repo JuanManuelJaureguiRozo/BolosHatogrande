@@ -74,6 +74,49 @@
       font-size: 0.875rem;
     }
 
+    .search-box {
+      position: relative;
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 0.25rem);
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: none;
+      max-height: 14rem;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #b7cbc5;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.35rem 0.75rem rgba(0, 76, 63, 0.15);
+    }
+
+    .search-results.show {
+      display: block;
+    }
+
+    .search-result {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 0;
+      border-bottom: 1px solid #edf2f0;
+      background: white;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .search-result:last-child {
+      border-bottom: 0;
+    }
+
+    .search-result:hover,
+    .search-result:focus {
+      background: #e8f3ef;
+      outline: none;
+    }
+
     .resultado {
       width: 100%;
       max-width: 42rem;
@@ -252,8 +295,10 @@
       </div>
       <div class="input-panel col-12 col-md-6">
         <label for="jugador" class="form-label">Buscar jugador</label>
-        <input id="jugador" class="form-control" list="jugadores" placeholder="Escribe para buscar..." autocomplete="off">
-        <datalist id="jugadores"></datalist>
+        <div class="search-box">
+          <input id="jugador" class="form-control" placeholder="Escribe para buscar..." autocomplete="off" aria-controls="jugadores-resultados" aria-autocomplete="list">
+          <div id="jugadores-resultados" class="search-results" role="listbox"></div>
+        </div>
       </div>
       <div class="input-panel col-12 col-md-6">
         <label for="promedio" class="form-label">Tu promedio actual</label>
@@ -289,24 +334,32 @@
         </div>
         <div class="col-12">
           <label for="integrante-1" class="form-label">Integrante 1</label>
-          <input id="integrante-1" class="form-control integrante-nombre" list="integrantes" placeholder="Buscar por nombre (opcional)" autocomplete="off">
+          <div class="search-box">
+            <input id="integrante-1" class="form-control integrante-nombre" placeholder="Buscar por nombre (opcional)" autocomplete="off" aria-controls="integrantes-resultados-1" aria-autocomplete="list">
+            <div id="integrantes-resultados-1" class="search-results" role="listbox"></div>
+          </div>
           <input id="hcp-1" class="form-control mt-2 integrante-hcp" type="number" min="0" step="1" placeholder="HCP del integrante 1" required>
         </div>
         <div class="col-12">
           <label for="integrante-2" class="form-label">Integrante 2</label>
-          <input id="integrante-2" class="form-control integrante-nombre" list="integrantes" placeholder="Buscar por nombre (opcional)" autocomplete="off">
+          <div class="search-box">
+            <input id="integrante-2" class="form-control integrante-nombre" placeholder="Buscar por nombre (opcional)" autocomplete="off" aria-controls="integrantes-resultados-2" aria-autocomplete="list">
+            <div id="integrantes-resultados-2" class="search-results" role="listbox"></div>
+          </div>
           <input id="hcp-2" class="form-control mt-2 integrante-hcp" type="number" min="0" step="1" placeholder="HCP del integrante 2" required>
         </div>
         <div class="col-12">
           <label for="integrante-3" class="form-label">Integrante 3</label>
-          <input id="integrante-3" class="form-control integrante-nombre" list="integrantes" placeholder="Buscar por nombre (opcional)" autocomplete="off">
+          <div class="search-box">
+            <input id="integrante-3" class="form-control integrante-nombre" placeholder="Buscar por nombre (opcional)" autocomplete="off" aria-controls="integrantes-resultados-3" aria-autocomplete="list">
+            <div id="integrantes-resultados-3" class="search-results" role="listbox"></div>
+          </div>
           <input id="hcp-3" class="form-control mt-2 integrante-hcp" type="number" min="0" step="1" placeholder="HCP del integrante 3" required>
         </div>
         <div class="col-12">
           <button class="btn btn-success w-100" type="submit">Calcular HCP de la terna</button>
         </div>
       </form>
-      <datalist id="integrantes"></datalist>
       <section id="resultado-terna" class="resultado mt-4 p-4 d-none" aria-live="polite"></section>
     </section>
   </main>
@@ -328,10 +381,9 @@
     const genero = document.getElementById("genero");
     const jugador = document.getElementById("jugador");
     const promedio = document.getElementById("promedio");
-    const jugadores = document.getElementById("jugadores");
+    const jugadoresResultados = document.getElementById("jugadores-resultados");
     const estado = document.getElementById("estado");
     const resultado = document.getElementById("resultado");
-    const integrantes = document.getElementById("integrantes");
     const resultadoTerna = document.getElementById("resultado-terna");
 
     function normalizar(valor) {
@@ -339,35 +391,54 @@
     }
 
     function cargarJugadores() {
-      jugadores.innerHTML = "";
-      escalafones[genero.value].forEach(persona => {
-        const option = document.createElement("option");
-        option.value = persona.nombre;
-        jugadores.appendChild(option);
+      configurarBusqueda(jugador, jugadoresResultados, escalafones[genero.value], persona => {
+        promedio.value = persona.promedio.toFixed(2);
       });
-    }
-
-    function seleccionarJugador() {
-      const persona = escalafones[genero.value].find(item => normalizar(item.nombre) === normalizar(jugador.value));
-      if (persona) promedio.value = persona.promedio.toFixed(2);
     }
 
     function cargarIntegrantes() {
-      integrantes.innerHTML = "";
-      const nombres = new Set([...escalafones.masculino, ...escalafones.femenino].map(persona => persona.nombre));
-      nombres.forEach(nombre => {
-        const option = document.createElement("option");
-        option.value = nombre;
-        integrantes.appendChild(option);
+      const personas = [...escalafones.masculino, ...escalafones.femenino]
+        .filter((persona, index, lista) => lista.findIndex(item => normalizar(item.nombre) === normalizar(persona.nombre)) === index);
+      document.querySelectorAll(".integrante-nombre").forEach(input => {
+        configurarBusqueda(input, document.getElementById(`integrantes-resultados-${input.id.split("-")[1]}`), personas, persona => {
+          document.getElementById(`hcp-${input.id.split("-")[1]}`).value = persona.hcp;
+        });
       });
     }
 
-    function seleccionarIntegrante(event) {
-      const persona = [...escalafones.masculino, ...escalafones.femenino]
-        .find(item => normalizar(item.nombre) === normalizar(event.target.value));
-      if (persona) {
-        document.getElementById(`hcp-${event.target.id.split("-")[1]}`).value = persona.hcp;
-      }
+    function configurarBusqueda(input, results, personas, onSelect) {
+      if (input._searchCleanup) input._searchCleanup();
+      const render = () => {
+        const query = normalizar(input.value);
+        results.innerHTML = "";
+        if (!query) {
+          results.classList.remove("show");
+          return;
+        }
+        personas.filter(persona => normalizar(persona.nombre).includes(query)).slice(0, 8).forEach(persona => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "search-result";
+          option.textContent = persona.nombre;
+          option.setAttribute("role", "option");
+          option.addEventListener("click", () => {
+            input.value = persona.nombre;
+            onSelect(persona);
+            results.classList.remove("show");
+          });
+          results.appendChild(option);
+        });
+        results.classList.toggle("show", results.childElementCount > 0);
+      };
+      const hide = () => setTimeout(() => results.classList.remove("show"), 150);
+      input.addEventListener("input", render);
+      input.addEventListener("focus", render);
+      input.addEventListener("blur", hide);
+      input._searchCleanup = () => {
+        input.removeEventListener("input", render);
+        input.removeEventListener("focus", render);
+        input.removeEventListener("blur", hide);
+      };
     }
 
     document.getElementById("calculadora").addEventListener("submit", event => {
@@ -399,15 +470,9 @@
       resultado.classList.add("d-none");
       cargarJugadores();
     });
-    jugador.addEventListener("change", seleccionarJugador);
-
     cargarJugadores();
     cargarIntegrantes();
     estado.textContent = "La búsqueda está lista.";
-
-    document.querySelectorAll(".integrante-nombre").forEach(input => {
-      input.addEventListener("change", seleccionarIntegrante);
-    });
 
     document.getElementById("calculadora-terna").addEventListener("submit", event => {
       event.preventDefault();
