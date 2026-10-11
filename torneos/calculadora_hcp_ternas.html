@@ -322,15 +322,19 @@
       <div class="formula text-center mb-4">
         HCP de la terna = suma de HCP individuales × porcentaje
       </div>
+      <p class="input-help mb-3">
+        El promedio de la terna es (promedios del escalafón + HCP individuales) ÷ 3.
+        Grupo A: promedio entre 160 y 190. Grupo B: promedio de 160 o menos.
+        Máximo un jugador de élite o primera por terna y, si participa, debe haber
+        al menos un jugador de tercera.
+      </p>
 
       <form id="calculadora-terna" class="row g-3" novalidate>
         <div class="input-panel col-12">
-          <label for="tipo-terna" class="form-label">Tipo de terna</label>
-          <select id="tipo-terna" class="form-select" required>
-            <option value="masculina">Terna masculina — 60%</option>
-            <option value="mixta">Terna mixta — 65%</option>
-            <option value="femenina">Terna femenina — 70%</option>
-          </select>
+          <div class="input-help">
+            El tipo de terna se identifica automáticamente según el escalafón de los
+            nombres seleccionados.
+          </div>
         </div>
         <div class="input-panel col-12">
           <label for="integrante-1" class="form-label">Integrante 1</label>
@@ -447,6 +451,20 @@
       };
     }
 
+    function categoriaEsEliteOPrimera(categoria) {
+      return /CATEGORIA ELITE|PRIMERA CATEGORIA/.test(categoria);
+    }
+
+    function categoriaEsTercera(categoria) {
+      return categoria === "TERCERA CATEGORIA";
+    }
+
+    function obtenerGrupo(promedio) {
+      if (promedio <= 160) return "B";
+      if (promedio <= 190) return "A";
+      return null;
+    }
+
     document.getElementById("calculadora").addEventListener("submit", event => {
       event.preventDefault();
       const promedioUsuario = Number.parseFloat(promedio.value);
@@ -483,7 +501,6 @@
 
     document.getElementById("calculadora-terna").addEventListener("submit", event => {
       event.preventDefault();
-      const tipo = document.getElementById("tipo-terna").value;
       const hcps = [1, 2, 3].map(index => Number.parseFloat(document.getElementById(`hcp-${index}`).value));
       if (hcps.some(hcp => !Number.isFinite(hcp) || hcp < 0)) {
         resultadoTerna.innerHTML = `<p class="text-danger mb-0">Ingresa un HCP válido para los tres integrantes.</p>`;
@@ -492,15 +509,59 @@
       }
 
       const suma = hcps.reduce((total, hcp) => total + hcp, 0);
+      const nombres = [1, 2, 3].map(index => document.getElementById(`integrante-${index}`).value);
+      const jugadoresTerna = nombres.map(nombre => {
+        const masculino = escalafones.masculino.find(persona => normalizar(persona.nombre) === normalizar(nombre));
+        if (masculino) return { ...masculino, genero: "masculino" };
+        const femenino = escalafones.femenino.find(persona => normalizar(persona.nombre) === normalizar(nombre));
+        return femenino ? { ...femenino, genero: "femenino" } : null;
+      });
+      const generos = new Set(jugadoresTerna.filter(Boolean).map(jugador => jugador.genero));
+      const tipo = jugadoresTerna.every(Boolean)
+        ? generos.size === 2 ? "mixta" : generos.has("masculino") ? "masculina" : "femenina"
+        : null;
+      if (!tipo) {
+        resultadoTerna.innerHTML = `<div class="alert alert-danger mb-0">Selecciona los tres nombres de jugadores del escalafón para identificar correctamente el tipo de terna.</div>`;
+        resultadoTerna.classList.remove("d-none");
+        return;
+      }
       const porcentaje = porcentajesTerna[tipo];
-      const hcpFinal = Math.round(suma * porcentaje);
       const hcpCalculado = suma * porcentaje;
+      const hcpFinal = Math.round(hcpCalculado);
+      const promedioTerna = jugadoresTerna.every(Boolean)
+        ? jugadoresTerna.reduce((total, jugador, index) => total + jugador.promedio + hcps[index], 0) / jugadoresTerna.length
+        : null;
+      const grupo = promedioTerna === null ? null : obtenerGrupo(promedioTerna);
+      const jugadoresEspeciales = jugadoresTerna.filter(jugador =>
+        jugador && categoriaEsEliteOPrimera(jugador.categoria)
+      );
+      const tieneTercera = jugadoresTerna.some(jugador =>
+        jugador && categoriaEsTercera(jugador.categoria)
+      );
+      const restricciones = [];
+
+      if (jugadoresEspeciales.length > 1) {
+        restricciones.push("Una terna puede tener máximo un jugador de élite o primera categoría.");
+      }
+      if (jugadoresEspeciales.length > 0 && !tieneTercera) {
+        restricciones.push("Si participa un jugador de élite o primera categoría, debe haber al menos un jugador de tercera categoría.");
+      }
+      if (grupo === "B" && jugadoresEspeciales.length > 0) {
+        restricciones.push("Un jugador de élite o primera categoría no puede participar en una terna del grupo B.");
+      }
+      if (!grupo) {
+        restricciones.push("El promedio de la terna supera el límite establecido para los grupos A y B.");
+      }
+
       resultadoTerna.innerHTML = `
         <h3 class="h5 text-success">Resultado de la terna</h3>
         <p class="mb-2">Tipo: <strong>Terna ${tipo}</strong> (${porcentaje * 100}%)</p>
-        <p class="mb-2">Suma de HCP individuales: <strong>${suma.toFixed(2)}</strong></p>
+        <p class="mb-2">Suma de HCP individuales: <strong>${Math.round(suma)}</strong></p>
+        <p class="mb-2">Promedio de la terna: <strong>${promedioTerna === null ? "No disponible" : promedioTerna.toFixed(2)}</strong></p>
+        <p class="mb-2">Grupo: <strong>${grupo || "No válido"}</strong></p>
         <p class="mb-2">HCP calculado: <strong>${hcpCalculado.toFixed(2)}</strong></p>
         <p class="mb-0 text-center display-6">HCP final: <strong>${hcpFinal}</strong></p>
+        ${restricciones.length ? `<div class="alert alert-danger mt-3 mb-0"><strong>Combinación no válida:</strong><ul class="mb-0">${restricciones.map(restriccion => `<li>${restriccion}</li>`).join("")}</ul></div>` : ""}
       `;
       resultadoTerna.classList.remove("d-none");
     });
