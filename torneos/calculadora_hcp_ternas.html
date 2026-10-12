@@ -324,7 +324,7 @@
       </div>
       <p class="input-help mb-3">
         El promedio de la terna es (promedios del escalafón + HCP individuales) ÷ 3.
-        Grupo A: promedio entre 160 y 190. Grupo B: promedio de 160 o menos.
+        Grupo A: promedio superior a 170 y hasta 190. Grupo B: promedio de 170 o menos.
         Máximo un jugador de élite o primera por terna y, si participa, debe haber
         al menos un jugador de tercera o inferior.
       </p>
@@ -465,7 +465,7 @@
     }
 
     function obtenerGrupo(promedio) {
-      if (promedio <= 160) return "B";
+      if (promedio <= 170) return "B";
       if (promedio <= 190) return "A";
       return null;
     }
