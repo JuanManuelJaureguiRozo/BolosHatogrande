@@ -320,7 +320,7 @@
         según el escalafón de cada nombre y el HCP se carga desde el escalafón.
       </p>
       <div class="formula text-center mb-4">
-        HCP de la terna = suma de HCP individuales × porcentaje
+        HCP de la terna = suma de HCP individuales × 60%
       </div>
       <p class="input-help mb-3">
         El promedio de la terna es (promedios del escalafón + HCP individuales) ÷ 3.
@@ -333,7 +333,8 @@
         <div class="input-panel col-12">
           <div class="input-help">
             No necesitas seleccionar el tipo de terna; se identifica automáticamente
-            según los nombres seleccionados.
+            según los nombres seleccionados. El porcentaje es siempre 60%, sin importar
+            si la terna es masculina, femenina o mixta.
           </div>
         </div>
         <div class="input-panel col-12">
@@ -387,7 +388,7 @@
       masculino: [...ESCALAFON_CACHE.masculino],
       femenino: [...ESCALAFON_CACHE.femenino]
     };
-    const porcentajesTerna = { masculina: 0.6, mixta: 0.65, femenina: 0.7 };
+    const PORCENTAJE_TERNA = 0.6;
     const genero = document.getElementById("genero");
     const jugador = document.getElementById("jugador");
     const promedio = document.getElementById("promedio");
@@ -530,8 +531,7 @@
         resultadoTerna.classList.remove("d-none");
         return;
       }
-      const porcentaje = porcentajesTerna[tipo];
-      const hcpCalculado = suma * porcentaje;
+      const hcpCalculado = suma * PORCENTAJE_TERNA;
       const hcpFinal = Math.round(hcpCalculado);
       const promedioTerna = jugadoresTerna.every(Boolean)
         ? jugadoresTerna.reduce((total, jugador, index) => total + jugador.promedio + hcps[index], 0) / jugadoresTerna.length
@@ -560,7 +560,7 @@
 
       resultadoTerna.innerHTML = `
         <h3 class="h5 text-success">Resultado de la terna</h3>
-        <p class="mb-2">Tipo: <strong>Terna ${tipo}</strong> (${porcentaje * 100}%)</p>
+        <p class="mb-2">Tipo: <strong>Terna ${tipo}</strong> (60%)</p>
         <p class="mb-2">Suma de HCP individuales: <strong>${Math.round(suma)}</strong></p>
         <p class="mb-2">Promedio de la terna: <strong>${promedioTerna === null ? "No disponible" : promedioTerna.toFixed(2)}</strong></p>
         <p class="mb-2">Grupo: <strong>${grupo || "No válido"}</strong></p>

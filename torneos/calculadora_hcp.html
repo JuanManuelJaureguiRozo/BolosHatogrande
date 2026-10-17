@@ -320,7 +320,7 @@
       </p>
       <div class="formula text-center mb-4">
         HCP de la terna = redondear al entero más cercano<br>
-        (suma de HCP individuales × porcentaje del tipo de terna)
+        (suma de HCP individuales × 60%)
       </div>
 
       <form id="calculadora-terna" class="row g-3" novalidate>
@@ -377,7 +377,7 @@
       masculino: [...ESCALAFON_CACHE.masculino],
       femenino: [...ESCALAFON_CACHE.femenino]
     };
-    const porcentajesTerna = { masculina: 0.6, mixta: 0.65, femenina: 0.7 };
+    const PORCENTAJE_TERNA = 0.6;
     const genero = document.getElementById("genero");
     const jugador = document.getElementById("jugador");
     const promedio = document.getElementById("promedio");
@@ -485,12 +485,12 @@
       }
 
       const suma = hcps.reduce((total, hcp) => total + hcp, 0);
-      const porcentaje = porcentajesTerna[tipo];
+      const porcentaje = PORCENTAJE_TERNA;
       const hcpSinRedondear = suma * porcentaje;
       const hcpFinal = Math.round(hcpSinRedondear);
       resultadoTerna.innerHTML = `
         <h3 class="h5 text-success">Resultado de la terna</h3>
-        <p class="mb-2">Tipo: <strong>Terna ${tipo}</strong> (${porcentaje * 100}%)</p>
+        <p class="mb-2">Tipo: <strong>Terna ${tipo}</strong></p>
         <p class="mb-2">Suma de HCP individuales: <strong>${suma.toFixed(2)}</strong></p>
         <p class="mb-2">HCP calculado: <strong>${hcpSinRedondear.toFixed(2)}</strong></p>
         <p class="mb-0 text-center display-6">HCP final: <strong>${hcpFinal}</strong></p>
