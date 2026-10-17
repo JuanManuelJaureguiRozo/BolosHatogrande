@@ -275,7 +275,7 @@
       <ol>
         <li>Selecciona el género del escalafón que quieres consultar.</li>
         <li>Busca tu nombre en la lista o escribe tu promedio actual.</li>
-        <li>La calculadora toma como referencia al jugador con el promedio más alto de ese género.</li>
+        <li>La calculadora toma como referencia al jugador masculino con el promedio más alto, sin importar el género seleccionado.</li>
         <li>El resultado es la diferencia entre ambos promedios multiplicada por 0.7.</li>
         <li>El resultado final se redondea al entero más cercano.</li>
       </ol>
@@ -390,8 +390,12 @@
       return String(valor ?? "").trim().toLocaleLowerCase("es");
     }
 
+    function obtenerEscalafonSeleccionado() {
+      return genero.value === "femenino" ? escalafones.femenino : escalafones.masculino;
+    }
+
     function cargarJugadores() {
-      configurarBusqueda(jugador, jugadoresResultados, escalafones[genero.value], persona => {
+      configurarBusqueda(jugador, jugadoresResultados, obtenerEscalafonSeleccionado(), persona => {
         promedio.value = persona.promedio.toFixed(2);
       });
     }
@@ -444,19 +448,20 @@
     document.getElementById("calculadora").addEventListener("submit", event => {
       event.preventDefault();
       const promedioUsuario = Number.parseFloat(promedio.value);
-      const personas = escalafones[genero.value];
+      const personas = obtenerEscalafonSeleccionado();
+      const referencias = escalafones.masculino;
       if (!Number.isFinite(promedioUsuario) || promedioUsuario < 0 || personas.length === 0) {
         estado.textContent = "Ingresa un promedio válido y espera a que cargue el escalafón.";
         estado.className = "small text-danger mt-3";
         return;
       }
-      const mejor = personas.reduce((actual, persona) => persona.promedio > actual.promedio ? persona : actual);
+      const mejor = referencias.reduce((actual, persona) => persona.promedio > actual.promedio ? persona : actual);
       const diferencia = Math.max(0, mejor.promedio - promedioUsuario);
       const hcpSinRedondear = diferencia * 0.7;
       const hcp = Math.round(hcpSinRedondear);
       resultado.innerHTML = `
         <h2 class="h4 text-success">Resultado</h2>
-        <p class="mb-2">Promedio de referencia: <strong>${mejor.promedio.toFixed(2)}</strong> — ${mejor.nombre}</p>
+        <p class="mb-2">Promedio de referencia (masculino): <strong>${mejor.promedio.toFixed(2)}</strong> — ${mejor.nombre}</p>
         <p class="mb-2">Diferencia: <strong>${diferencia.toFixed(2)}</strong></p>
         <p class="mb-2">HCP calculado: <strong>${hcpSinRedondear.toFixed(2)}</strong></p>
         <p class="mb-0 text-center display-6">HCP final: <strong>${hcp}</strong></p>
