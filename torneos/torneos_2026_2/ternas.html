@@ -299,8 +299,14 @@
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
+    let categoriaActual = "";
     json.data.forEach(row => {
       const tr = document.createElement("tr");
+      const primerValor = String(row[0] ?? "").trim().toUpperCase();
+      if (primerValor.includes("CATEGORÍA")) {
+        categoriaActual = primerValor;
+      }
+      tr.dataset.categoria = categoriaActual;
       for (let i = 0; i < json.headers.length; i++) {
         const td = document.createElement("td");
         td.textContent = row[i] ?? "";
@@ -454,39 +460,43 @@ function calcularPremios(table, groupSize) {
   const groups = [];
   for (let i = 0; i + groupSize <= rows.length; i += groupSize) {
     const groupRows = rows.slice(i, i + groupSize);
+    if (!groupRows.every(row => row.dataset.categoria === groupRows[0].dataset.categoria)) {
+      continue;
+    }
     const lineas = Array.from({ length: 10 }, (_, lineIndex) => groupRows.reduce((total, row) => total + (parseInt(row.dataset[`column${lineIndex + 3}`], 10) || 0), 0));
     const value = Math.max(...lineas);
     const hcp = groupRows.reduce((total, row) => total + (parseInt(row.dataset.column2, 10) || 0), 0);
-    groups.push({ id: i, jugadores: groupRows.map(row => row.dataset.column1).filter(Boolean), sinHCP: value, conHCP: value + hcp, lineaSinHCP: lineas.indexOf(value) + 1, lineaConHCP: lineas.indexOf(value) + 1 });
+    groups.push({
+      id: i,
+      categoria: groupRows[0].dataset.categoria,
+      jugadores: groupRows.map(row => row.dataset.column1).filter(Boolean),
+      conHCP: value + hcp,
+      lineaConHCP: lineas.indexOf(value) + 1,
+    });
   }
-  const ordenar = campo => [...groups].sort((a, b) => b[campo] - a[campo]);
-  return {
-    sinHCP: ordenar("sinHCP").slice(0, 2),
-    conHCP: ordenar("conHCP").slice(0, 2),
-  };
+  return ["CATEGORÍA A", "CATEGORÍA B"].map(categoria => ({
+    categoria,
+    mejor: groups
+      .filter(group => group.categoria === categoria)
+      .sort((a, b) => b.conHCP - a.conHCP)[0],
+  }));
 }
 
 function mostrarPremios(container, premios, nombreGrupo) {
   container.innerHTML = "";
-  const tarjetas = [
-    ["🥇 Mejor línea sin HCP", premios.sinHCP[0], "sinHCP"],
-    ["🥇 Mejor línea con HCP", premios.conHCP[0], "conHCP"],
-    ["🥈 Segunda línea sin HCP", premios.sinHCP[1], "sinHCP"],
-    ["🥈 Segunda línea con HCP", premios.conHCP[1], "conHCP"],
-  ];
-
-  tarjetas.forEach(([titulo, premio, campo]) => {
+  premios.forEach(({ categoria, mejor }) => {
+    const premio = mejor;
     if (!premio) return;
     const card = document.createElement("div");
     card.className = "card premio-card shadow-sm border-success mx-auto mb-3";
     card.innerHTML = `
       <div class="card-body text-center">
-        <h5 class="card-title text-success">${titulo}</h5>
+        <h5 class="card-title text-success">🥇 Mejor línea con HCP - ${categoria}</h5>
         <p class="card-text mb-1"><strong>${premio.jugadores.join(" y ")}</strong></p>
         <p class="text-muted mb-2">
-          ${nombreGrupo} con la línea L${campo === "sinHCP" ? premio.lineaSinHCP : premio.lineaConHCP}
+          ${nombreGrupo} con la línea L${premio.lineaConHCP}
         </p>
-        <h2 class="text-dark mb-0">${premio[campo]}</h2>
+        <h2 class="text-dark mb-0">${premio.conHCP}</h2>
       </div>`;
     container.appendChild(card);
   });
