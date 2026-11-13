@@ -662,7 +662,7 @@
 
   function mostrarPremios(container, premios, nombreGrupo) {
     container.innerHTML = "";
-    [["🥇 Mejor línea sin HCP", premios.sinHCP[0], "sinHCP"], ["🥇 Mejor línea con HCP", premios.conHCP[0], "conHCP"], ["🥈 Segunda línea sin HCP", premios.sinHCP[1], "sinHCP"], ["🥈 Segunda línea con HCP", premios.conHCP[1], "conHCP"]].forEach(([titulo, premio, campo]) => {
+    [["🥇 Mejor línea sin HCP", premios.sinHCP[0], "sinHCP"], ["🥇 Mejor línea con HCP", premios.conHCP[0], "conHCP"], ["🥈 Segunda mejor línea sin HCP", premios.sinHCP[1], "sinHCP"], ["🥈 Segunda mejor línea con HCP", premios.conHCP[1], "conHCP"]].forEach(([titulo, premio, campo]) => {
       if (!premio) return;
       const card = document.createElement("div");
       card.className = "card premio-card shadow-sm border-success mx-auto mb-3";
