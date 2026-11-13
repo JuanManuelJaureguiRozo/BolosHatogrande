@@ -281,41 +281,32 @@
 <script>
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbw0GH6lMcaoWTXq6XzWWAmq_uOTeX5rzUAOqT0TXTxgq9EhBOAUerruGtX0m5WLsVqiNQ/exec?hoja=Ternas%202026-1%20Ordenadas";
 
-async function fetchSheetAsTable(url) {
-  const loader = document.getElementById("loader");
-  const tabla = document.getElementById("tabla-resultados");
+  let ultimoDataJSON = null;
+  let tablaActual = null;
 
-  try {
-    const res = await fetch(url);
-    const json = await res.json();
-
-    if (!json || !json.headers || !json.data) {
-      loader.innerHTML = `<p>No hay datos</p>`;
-      return;
-    }
-
+  function construirTabla(json, url) {
     const table = document.createElement("table");
     table.className = "table table-bordered table-striped";
 
-    // HEADER
     const thead = document.createElement("thead");
     const trHead = document.createElement("tr");
-
-    json.headers.forEach(h => {
+    json.headers.forEach(header => {
       const th = document.createElement("th");
-      th.textContent = h;
+      th.textContent = header;
       trHead.appendChild(th);
     });
-
     thead.appendChild(trHead);
     table.appendChild(thead);
 
-    // BODY
     const tbody = document.createElement("tbody");
-
+    let categoriaActual = "";
     json.data.forEach(row => {
       const tr = document.createElement("tr");
-
+      const primerValor = String(row[0] ?? "").trim().toUpperCase();
+      if (primerValor.includes("CATEGORÍA")) {
+        categoriaActual = primerValor;
+      }
+      tr.dataset.categoria = categoriaActual;
       for (let i = 0; i < json.headers.length; i++) {
         const td = document.createElement("td");
         td.textContent = row[i] ?? "";
@@ -326,50 +317,29 @@ async function fetchSheetAsTable(url) {
 
       tbody.appendChild(tr);
     });
-
     table.appendChild(tbody);
 
-    // 🔥 MERGE CORRECTO POR TERNAS
+    // Merge the shared columns for each three-player group.
     const rows = Array.from(tbody.querySelectorAll("tr"));
-
     let i = 0;
-
     while (i < rows.length) {
       const row1 = rows[i];
       const cells1 = Array.from(row1.querySelectorAll("td"));
-
-      const isCategoria = cells1[0]?.textContent
-        .toUpperCase()
-        .includes("CATEGORÍA");
-
-      if (isCategoria) {
+      if (cells1[0]?.textContent.toUpperCase().includes("CATEGORÍA")) {
         i++;
         continue;
       }
 
       const row2 = rows[i + 1];
       const row3 = rows[i + 2];
-
       if (!row2 || !row3) break;
-
       const cells2 = Array.from(row2.querySelectorAll("td"));
       const cells3 = Array.from(row3.querySelectorAll("td"));
-
       const totalCols = cells1.length;
-
-      const ptoIdx = 0;
-      const hcpIdx = 2;
-      // Now 4 columns at the end
-      const col4Idx = totalCols - 1;
-      const col3Idx = totalCols - 2;
-      const col2Idx = totalCols - 3;
-      const col1Idx = totalCols - 4;
-
-      const mergeAt = (idx) => {
-        const a = cells1[idx];
-        const b = cells2[idx];
-        const c = cells3[idx];
-
+      const mergeAt = index => {
+        const a = cells1[index];
+        const b = cells2[index];
+        const c = cells3[index];
         if (a && b && c) {
           a.rowSpan = 3;
           a.classList.add("align-middle");
@@ -380,119 +350,109 @@ async function fetchSheetAsTable(url) {
         }
       };
 
-      // 🔥 IMPORTANTE: derecha → izquierda
-      mergeAt(col4Idx);
-      mergeAt(col3Idx);
-      mergeAt(col2Idx);
-      mergeAt(col1Idx);
-      mergeAt(hcpIdx);
-      mergeAt(ptoIdx);
-
+      for (let index = totalCols - 1; index >= totalCols - 4; index--) {
+        mergeAt(index);
+      }
+      mergeAt(2);
+      mergeAt(0);
       i += 3;
     }
 
-    // 🎨 ESTILOS
     resaltarCeldas(table, url);
-    mostrarPremios(document.getElementById("mejor-terna"), calcularPremios(table, 3), "Terna");
-
-    tabla.appendChild(table);
-    tabla.style.display = "block";
-
-  } catch (err) {
-    console.error(err);
-    loader.innerHTML = `<p>Error cargando</p>`;
-    return;
+    return table;
   }
 
-  loader.remove();
-}
+  async function fetchSheetAsTable(url) {
+    const loader = document.getElementById("loader");
+    const tabla = document.getElementById("tabla-resultados");
 
-function resaltarCeldas(table, url) {
-  const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase() || "";
-  const rows = table.querySelectorAll("tbody tr");
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      const json = await res.json();
 
-  const categoryColors = {
-    "CATEGORÍA A": "#cce5ff",
-    "CATEGORÍA B": "#d4edda",
-  };
-
-  let groupCounter = 0; // 🔥 contador real de ternas
-
-  rows.forEach((row) => {
-    const cells = row.children;
-    const text = cells[0]?.textContent.toUpperCase();
-
-    // 🔥 FILA DE CATEGORÍA
-    if (text.includes("CATEGORÍA")) {
-      const totalCols = cells.length;
-      const firstCell = cells[0];
-
-      firstCell.colSpan = totalCols;
-      firstCell.style.textAlign = "center";
-      firstCell.style.fontWeight = "bold";
-      firstCell.style.backgroundColor = categoryColors[text] || "#eee";
-
-      // eliminar resto de celdas
-      for (let i = cells.length - 1; i > 0; i--) {
-        cells[i].remove();
+      if (!json || !Array.isArray(json.headers) || !Array.isArray(json.data)) {
+        if (loader) {
+          loader.innerHTML = `<p class="text-danger mt-3">No se encontraron resultados para mostrar.</p>`;
+        }
+        return;
       }
 
-      groupCounter = 0; // 🔥 reset para nueva categoría
-      return;
+      const jsonString = JSON.stringify(json);
+      if (jsonString === ultimoDataJSON) return;
+      ultimoDataJSON = jsonString;
+
+      const nuevaTabla = construirTabla(json, url);
+      tabla.innerHTML = "";
+      tabla.appendChild(nuevaTabla);
+      tablaActual = nuevaTabla;
+      tabla.style.display = "block";
+      mostrarPremios(
+        document.getElementById("mejor-terna"),
+        calcularPremios(tablaActual, 3),
+        "Terna"
+      );
+      if (loader) loader.remove();
+    } catch (err) {
+      console.error("Error al cargar la tabla:", err);
+      if (loader) {
+        loader.innerHTML = `<p class="text-danger mt-3">Error al cargar los resultados</p>`;
+      }
     }
+  }
 
-    if (hoja.includes("ternas")) {
-      const groupPos = groupCounter % 3;
-      groupCounter++;
+  function resaltarCeldas(table, url) {
+    const hoja = new URL(url).searchParams.get("hoja")?.toLowerCase() || "";
+    const rows = table.querySelectorAll("tbody tr");
 
-      const totalCols = cells.length;
-      const lastGameIdx = totalCols - 3; // now 4 columns at the end
+    const categoryColors = {
+      "CATEGORÍA A": "#cce5ff",
+      "CATEGORÍA B": "#d4edda",
+    };
 
-      if (groupPos === 0) {
-        // 🥇 Primer jugador (tiene HCP visible)
-        for (let j = 1; j <= 12; j++) {
-          const cell = cells[j];
-          if (!cell) continue;
+    let groupCounter = 0;
 
-          const value = parseInt(cell.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            cell.style.backgroundColor = "#ffeb3b";
-          }
+    rows.forEach(row => {
+      const cells = row.children;
+      const text = cells[0]?.textContent.trim().toUpperCase() || "";
+
+      if (text.includes("CATEGORÍA")) {
+        const firstCell = cells[0];
+        firstCell.colSpan = cells.length;
+        firstCell.style.textAlign = "center";
+        firstCell.style.fontWeight = "bold";
+        firstCell.style.color = "black";
+        firstCell.style.backgroundColor = categoryColors[text] || "#eee";
+
+        for (let i = cells.length - 1; i > 0; i--) {
+          cells[i].remove();
         }
+        groupCounter = 0;
+        return;
+      }
 
-      } else if (groupPos === 1) {
-        // 🥈 Segundo jugador (sin HCP → offset)
-        for (let j = 1; j <= lastGameIdx; j++) {
+      if (hoja.includes("ternas")) {
+        const groupPos = groupCounter++ % 3;
+        const lastGameIdx = cells.length - 3;
+        const startIndex = groupPos === 0 ? 1 : 1;
+        const endIndex = groupPos === 0 ? Math.min(12, lastGameIdx) : lastGameIdx;
+
+        for (let j = startIndex; j <= endIndex; j++) {
           const cell = cells[j];
-          if (!cell) continue;
-
-          const value = parseInt(cell.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            cell.style.backgroundColor = "#ffeb3b";
-          }
-        }
-
-      } else if (groupPos === 2) {
-        // 🥉 Tercer jugador
-        for (let j = 1; j <= lastGameIdx; j++) {
-          const cell = cells[j];
-          if (!cell) continue;
-
-          const value = parseInt(cell.textContent.trim());
-          if (!isNaN(value) && value >= 200) {
-            cell.style.backgroundColor = "#ffeb3b";
+          const value = parseInt(cell?.textContent.trim(), 10);
+          if (cell) {
+            cell.style.backgroundColor = !isNaN(value) && value >= 200
+              ? "#ffeb3b"
+              : "";
           }
         }
       }
-    }
-  });
+    });
 
-  // 🎨 estilos header
-  table.querySelectorAll("thead th").forEach(th => {
-    th.style.backgroundColor = "#004c3f";
-    th.style.color = "white";
-  });
-}
+    table.querySelectorAll("thead th").forEach(th => {
+      th.style.backgroundColor = "#004c3f";
+      th.style.color = "white";
+    });
+  }
 
 function calcularPremios(table, groupSize) {
   const rows = Array.from(table.querySelectorAll("tbody tr"))
@@ -500,31 +460,54 @@ function calcularPremios(table, groupSize) {
   const groups = [];
   for (let i = 0; i + groupSize <= rows.length; i += groupSize) {
     const groupRows = rows.slice(i, i + groupSize);
+    if (!groupRows.every(row => row.dataset.categoria === groupRows[0].dataset.categoria)) {
+      continue;
+    }
     const lineas = Array.from({ length: 10 }, (_, lineIndex) => groupRows.reduce((total, row) => total + (parseInt(row.dataset[`column${lineIndex + 3}`], 10) || 0), 0));
     const value = Math.max(...lineas);
     const hcp = groupRows.reduce((total, row) => total + (parseInt(row.dataset.column2, 10) || 0), 0);
-    groups.push({ id: i, jugadores: groupRows.map(row => row.dataset.column1).filter(Boolean), sinHCP: value, conHCP: value + hcp, lineaSinHCP: lineas.indexOf(value) + 1, lineaConHCP: lineas.indexOf(value) + 1 });
+    groups.push({
+      id: i,
+      categoria: groupRows[0].dataset.categoria,
+      jugadores: groupRows.map(row => row.dataset.column1).filter(Boolean),
+      conHCP: value + hcp,
+      lineaConHCP: lineas.indexOf(value) + 1,
+    });
   }
-  const ordenar = campo => [...groups].sort((a, b) => b[campo] - a[campo]);
-  return {
-    sinHCP: ordenar("sinHCP").slice(0, 2),
-    conHCP: ordenar("conHCP").slice(0, 2),
-  };
+  return ["CATEGORÍA A", "CATEGORÍA B"].map(categoria => ({
+    categoria,
+    mejor: groups
+      .filter(group => group.categoria === categoria)
+      .sort((a, b) => b.conHCP - a.conHCP)[0],
+  }));
 }
 
 function mostrarPremios(container, premios, nombreGrupo) {
   container.innerHTML = "";
-  [["🥇 Mejor línea sin HCP", premios.sinHCP[0], "sinHCP"], ["🥇 Mejor línea con HCP", premios.conHCP[0], "conHCP"], ["🥈 Segunda línea sin HCP", premios.sinHCP[1], "sinHCP"], ["🥈 Segunda línea con HCP", premios.conHCP[1], "conHCP"]].forEach(([titulo, premio, campo]) => {
+  premios.forEach(({ categoria, mejor }) => {
+    const premio = mejor;
     if (!premio) return;
     const card = document.createElement("div");
     card.className = "card premio-card shadow-sm border-success mx-auto mb-3";
-    card.style.maxWidth = "520px";
-    card.innerHTML = `<div class="card-body text-center"><h5 class="card-title text-success">${titulo}</h5><p class="card-text mb-1"><strong>${premio.jugadores.join(" y ")}</strong></p><p class="text-muted mb-2">${nombreGrupo} con la línea L${campo === "sinHCP" ? premio.lineaSinHCP : premio.lineaConHCP}</p><h2 class="text-dark mb-0">${premio[campo]}</h2></div>`;
+    card.innerHTML = `
+      <div class="card-body text-center">
+        <h5 class="card-title text-success">🥇 Mejor línea con HCP - ${categoria}</h5>
+        <p class="card-text mb-1"><strong>${premio.jugadores.join(" y ")}</strong></p>
+        <p class="text-muted mb-2">
+          ${nombreGrupo} con la línea L${premio.lineaConHCP}
+        </p>
+        <h2 class="text-dark mb-0">${premio.conHCP}</h2>
+      </div>`;
     container.appendChild(card);
   });
 }
 
-fetchSheetAsTable(SHEET_URL);
+  fetchSheetAsTable(SHEET_URL);
+  setInterval(() => fetchSheetAsTable(SHEET_URL), 20000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) fetchSheetAsTable(SHEET_URL);
+  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
