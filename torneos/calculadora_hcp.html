@@ -371,12 +371,12 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="datos_escalafon.js"></script>
   <script>
-    const escalafones = {
-      masculino: [...ESCALAFON_CACHE.masculino],
-      femenino: [...ESCALAFON_CACHE.femenino]
+    const ESCALAFON_URLS = {
+      masculino: "https://script.google.com/macros/s/AKfycbzcgz_ijbZeg6OudBz04DVOCgKI1KXVyQQoLgrVxFUF6RBc_7fqeJD3EMJ6N614pxxF/exec?hoja=Escalafon%20Masculino",
+      femenino: "https://script.google.com/macros/s/AKfycbxJZCWSqO_wvht4hnY00uH5yYpkHwW5xHxfwEgoDVeErNwpGEnSs6EahtYqO93O7KA/exec?hoja=Escalafon%20Femenino"
     };
+    let escalafones = { masculino: [], femenino: [] };
     const PORCENTAJE_TERNA = 0.6;
     const genero = document.getElementById("genero");
     const jugador = document.getElementById("jugador");
@@ -385,6 +385,87 @@
     const estado = document.getElementById("estado");
     const resultado = document.getElementById("resultado");
     const resultadoTerna = document.getElementById("resultado-terna");
+
+    function normalizarEscalafon(json) {
+      const categoriaLabels = new Set([
+        "CATEGORIA ELITE",
+        "PRIMERA CATEGORIA",
+        "SEGUNDA CATEGORIA",
+        "TERCERA CATEGORIA",
+        "CUARTA CATEGORIA A",
+        "CUARTA CATEGORIA B",
+        "CATEGORIA PROCESO DE ESCALAFON"
+      ]);
+      const rows = Array.isArray(json?.data) ? json.data : [];
+      let categoriaActual = "SIN CATEGORIA";
+
+      return rows.reduce((lista, row) => {
+        if (!Array.isArray(row) || row.length === 0) return lista;
+
+        const [numero, nombre, ...rest] = row;
+        const nombreJugador = typeof nombre === "string" ? nombre.trim() : "";
+        const nombreCategoria = typeof nombre === "string" ? nombre.trim().toUpperCase() : "";
+
+        if (nombreCategoria && categoriaLabels.has(nombreCategoria)) {
+          categoriaActual = nombreCategoria;
+          return lista;
+        }
+
+        if (!nombreJugador || !String(numero).trim() || Number.isNaN(Number.parseInt(String(numero), 10))) {
+          return lista;
+        }
+
+        const promedioValor = Number.parseFloat(String(row[28] ?? row[27] ?? row[26] ?? "").replace(",", "."));
+        const hcpValor = Number.parseFloat(String(row[29] ?? row[28] ?? "").replace(",", "."));
+
+        if (!Number.isFinite(promedioValor)) {
+          return lista;
+        }
+
+        lista.push({
+          nombre: nombreJugador,
+          promedio: promedioValor,
+          hcp: Number.isFinite(hcpValor) ? hcpValor : 0,
+          categoria: categoriaActual
+        });
+
+        return lista;
+      }, []);
+    }
+
+    async function cargarEscalafones() {
+      estado.textContent = "Cargando escalafones...";
+      estado.className = "small text-muted mt-3";
+
+      try {
+        const [respuestaMasculino, respuestaFemenino] = await Promise.all([
+          fetch(ESCALAFON_URLS.masculino),
+          fetch(ESCALAFON_URLS.femenino)
+        ]);
+
+        const [masculino, femenino] = await Promise.all([
+          respuestaMasculino.json(),
+          respuestaFemenino.json()
+        ]);
+
+        escalafones = {
+          masculino: normalizarEscalafon(masculino),
+          femenino: normalizarEscalafon(femenino)
+        };
+
+        if (escalafones.masculino.length === 0 || escalafones.femenino.length === 0) {
+          throw new Error("No se encontraron jugadores en el escalafón actualizado.");
+        }
+
+        cargarJugadores();
+        cargarIntegrantes();
+        estado.textContent = "La búsqueda está lista.";
+      } catch (error) {
+        console.error("Error al cargar escalafones actualizados:", error);
+        estado.textContent = "No se pudo cargar el escalafón actualizado. Intenta recargar la página.";
+        estado.className = "small text-danger mt-3";
+      }
+    }
 
     function normalizar(valor) {
       return String(valor ?? "").trim().toLocaleLowerCase("es");
@@ -475,9 +556,7 @@
       resultado.classList.add("d-none");
       cargarJugadores();
     });
-    cargarJugadores();
-    cargarIntegrantes();
-    estado.textContent = "La búsqueda está lista.";
+    cargarEscalafones();
 
     document.getElementById("calculadora-terna").addEventListener("submit", event => {
       event.preventDefault();
